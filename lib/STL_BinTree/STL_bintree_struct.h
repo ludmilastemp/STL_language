@@ -12,9 +12,6 @@
 
 #include "../STL_Onegin/STL_file_open.h"
 
-//#include "../../Wolfram/Stack_config/STACK_FILE_TYPE_VARIABLE.h"
-//#include "../../Stack/generic.h"
-
 #define BIN_TREE_DATA_VALUE_PRINT_SPECIFIER    "%d"
 #define BIN_TREE_DATA_OPCODE_PRINT_SPECIFIER   "%d"
 #define BIN_TREE_DATA_VARIABLE_PRINT_SPECIFIER "%s"
@@ -33,7 +30,7 @@ const int         lenOperation [] = {2, 3, 6, 3, 2};
 enum OPCODE
 {
     T_INT       = 0,
-    IN          = 1,
+    SYMBOL_NI   = 1,
     PRINTF      = 2,
     ASSING      = 3,
     END_STR     = 4,

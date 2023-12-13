@@ -11,6 +11,8 @@ front-end: 	front-end/main.cpp 								\
 			lib/STL_Onegin/STL_string.h                 	\
 			temp/stack_node_func.o                      	\
 			temp/stack_node_error.o                     	\
+			temp/stack_var_func.o                      		\
+			temp/stack_var_error.o                     		\
 
 	g++ front-end/main.cpp									\
 		front-end/RecRead.cpp								\
@@ -19,6 +21,8 @@ front-end: 	front-end/main.cpp 								\
 		lib/STL_Onegin/STL_file_open.cpp        			\
 		temp/stack_node_func.o                      		\
 		temp/stack_node_error.o                     		\
+		temp/stack_var_func.o                      			\
+		temp/stack_var_error.o                     			\
 		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body\
 		-Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE\
 		-Wformat-security -Wformat=1
@@ -102,4 +106,10 @@ spu:    	lib/STL_Spu/main.cpp 							\
 
 .PHONY: front-end back-end compile disasm spu clean
 
+# Make variables
+
 # .o для стека
+
+#g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE='\"../../front-end/STACK_FILE_TYPE_variable.h\"' -o temp/stack_var_func.o
+
+#g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE='\"../../front-end/STACK_FILE_TYPE_variable.h\"' -o temp/stack_var_error.o

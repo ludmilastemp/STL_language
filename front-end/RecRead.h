@@ -13,8 +13,11 @@
 #include "../lib/STL_BinTree/STL_bintree_struct.h"
 #include "../lib/STL_BinTree/STACK_FILE_TYPE_NODE.h"
 #include "../lib/STL_Stack/generic.h"
+#include "STACK_FILE_TYPE_Variable.h"
+#include "../lib/STL_Stack/generic.h"
 
 const char MAGIC[] = "meow";
+//const int  IHavePawsPeriod = 15;
 const int  IHavePaws = 15;
 
 struct RecursDescent
@@ -22,7 +25,7 @@ struct RecursDescent
     char* str;
     int pos;
     int error;
-//    Stack_Variable* var;
+    Stack_Variable* var;
     Stack_NodeBinTreeData* token;
 };
 

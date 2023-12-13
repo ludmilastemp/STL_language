@@ -1,6 +1,8 @@
 #include "back-end.h"
 
-static int GetOperation  (NodeBinTree* node, FILE* fp);
+enum {error in getoperation, ...}
+
+static int GetOperation  (NodeBinTree* node, FILE* fp);      // {emit} compile
 static int GetPrintf     (NodeBinTree* node, FILE* fp);
 static int GetAssign     (NodeBinTree* node, FILE* fp);
 static int GetCreate     (NodeBinTree* node, FILE* fp);
@@ -28,12 +30,14 @@ static int GetOperation (NodeBinTree* node, FILE* fp)
 {
     if (node == nullptr || fp == nullptr) return 1;
 
-    int check = 1;
-    check = check && GetPrintf (node, fp);
-    check = check && GetAssign (node, fp);
-    check = check && GetCreate (node, fp);
+//    int check = 1;
+//    check = check && GetPrintf (node, fp);
+//    check = check && GetAssign (node, fp);
+//    check = check && GetCreate (node, fp);
 
-    if (check == 1)
+    if ( GetPrintf (node, fp)
+         && GetAssign (node, fp)
+         && GetCreate (node, fp) )
     {
         printf ("\nERROR in GetOperation!!!\n\n");
 
@@ -47,6 +51,10 @@ static int GetOperation (NodeBinTree* node, FILE* fp)
                  node->data->variable);
         return 1;
     }
+
+//    if (check == 1)
+//    {
+//    }
 
     return 0;
 }
@@ -69,7 +77,7 @@ static int GetPrintf (NodeBinTree* node, FILE* fp)
 static int GetAssign (NodeBinTree* node, FILE* fp)
 {
     if (node == nullptr || fp == nullptr) return 1;
-
+       // one if
     if (node       ->data->opCode   != ASSING) return 1;
     if (node->right->data->type     != NodeBinTreeData::T_VALUE) return 1;
     if (node->left ->data->variable != 0) return 1;
