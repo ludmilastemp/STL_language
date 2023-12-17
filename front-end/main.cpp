@@ -3,13 +3,23 @@
 #include "RecRead.h"
 #include "../lib/STL_Graphviz/STL_graphviz.h"
 
-int main (const int argc , const char**  argv )
+int main (const int argc, const char** argv)
 {
-    File file = { .name = "examples/1.cpp" }; // gj evjkxfyb. argv
+    const char* argv1 = 0;
+    const char* argv2 = 0;
 
-    STL_Fread (&file); //?? ub if
+    if (argc <= 1) argv1 = "examples/1.cpp";
+    else argv1 = argv[1];
 
-    BinTree* tree = BinTreeCtor ();        //
+    if (argc <= 2) argv2 = "examples/1tree.cpp";
+    else argv2 = argv[2];
+
+    File file = { .name = argv1 };
+    STL_Fread (&file);
+
+    BinTree* tree = BinTreeCtor ();
+    if (tree == nullptr) return 0;
+
     tree->buf = file.text;
 
     Stack_NodeBinTreeData token = { 0 };
@@ -18,35 +28,33 @@ int main (const int argc , const char**  argv )
     Stack_Variable var = { 0 };
     StackCtor (&var);
 
-    RecursDescent recDescent = {.str   = tree->buf,
-                                .pos   = 0,
-                                .error = 0,
-                                .var   = &var,
-                                .token = &token};
+    RecursiveDescentCtx ctx = {.str   = tree->buf,
+                               .pos   = 0,
+                               .var   = &var,
+                               .token = &token};
 
-    LexicalAnalysis (&recDescent);
+    LexicalAnalysis (&ctx);
 
 //    printf ("COUNT TOKENS = %d\n", (int)token.size); // warning without (int)
 
-//    for (int i = 0; i < (int)token.size; i++)
-//    {
-//        printf ("\ni = %d"
-//                "\n\ttype     = %d"
-//                "\n\tvalue    = %d"
-//                "\n\topCode   = %d"
-//                "\n\tvariable = %d",
-//                 i,
-//                 token.data[i].type,
-//                 token.data[i].value,
-//                 token.data[i].opCode,
-//                 token.data[i].variable);
-//    }
+    for (int i = 0; i < (int)token.size; i++)
+    {
+        printf ("\ni = %d"
+                "\n\ttype     = %d"
+                "\n\tvalue    = %d"
+                "\n\topCode   = %d"
+                "\n\tvariable = %d\n",
+                 i,
+                 token.data[i].type,
+                 token.data[i].value,
+                 token.data[i].opCode,
+                 token.data[i].variable);
+    }
 
-    recDescent.pos = 0;   // in get mul op
-    tree->root = GetMultipleOperations (&recDescent);    // check \0
+    tree->root = GetMultipleOperations (&ctx);
 
-    STL_GraphvizBinTree (tree, 1);
-    BinTreePrintPostorderWithoutNil (tree, "examples/1tree.cpp");
+    STL_GraphvizBinTree (tree, after_front_end);
+    BinTreePrintPostorderWithoutNil (tree, argv2);
 
     StackDtor (&token);
 

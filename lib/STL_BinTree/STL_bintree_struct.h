@@ -16,24 +16,70 @@
 #define BIN_TREE_DATA_OPCODE_PRINT_SPECIFIER   "%d"
 #define BIN_TREE_DATA_VARIABLE_PRINT_SPECIFIER "%s"
 
-//const int MAX_LEN_VAR_NAME = 100;
+const int         nOperation      = 25;
+const char* const operation []    = {"\\Z",         // 0
+                                     "\\ni",        // 1
+                                     "\\gravo",     // 2
+                                     "::=",         // 3
+                                     ":)",          // 4
+                                     "+",           // 5
+                                     "-",           // 6
+                                     "*",           // 7
+                                     "/",           // 8
+                                     "^",           // 9
+                                     "(",           // 10
+                                     ")",           // 11
+                                     "sin",         // 12
+                                     "cos",         // 13
+                                     "ln",          // 14
+                                     "sqrt",        // 15
+                                     "<=>",         // 16
+                                     "\\katarce",   // 17
+                                     "\\katapanma", // 18
+                                     ">=",          // 19  // не выводится в графизе
+                                     "<=",          // 20
+                                     ">",           // 21
+                                     "<",           // 22
+                                     "==",          // 23
+                                     "!=",          // 24
+                                     "",            //
+                                     "",            //
+                                     };
 
-const int         nOperation      = 5;
-const char* const operation []    = {"\\Z",
-                                     "\\ni",
-                                     "\\gravo",
-                                     "::=",
-                                     ":)"};
-
-const int         lenOperation [] = {2, 3, 6, 3, 2};
+const int         lenOperation [] = {2, 3, 6, 3, 2,
+                                     1, 1, 1, 1, 1,
+                                     1, 1, 3, 3, 2,
+                                     4, 3, 8, 10, 2,
+                                     2, 1, 1, 2, 2,
+                                    };
 
 enum OPCODE
 {
-    T_INT       = 0,
-    SYMBOL_NI   = 1,
-    PRINTF      = 2,
-    ASSING      = 3,
-    END_STR     = 4,
+    T_INT               = 0,
+    SYMBOL_NI           = 1,
+    PRINTF              = 2,
+    ASSING              = 3,
+    END_STR             = 4,
+    ADD                 = 5,
+    SUB                 = 6,
+    MUL                 = 7,
+    DIV                 = 8,
+    POW                 = 9,
+    OPEN_PARENTHESIS    = 10,
+    CLOSE_PARENTHESIS   = 11,
+    SIN                 = 12,
+    COS                 = 13,
+    LN                  = 14,
+    SQRT                = 15,
+    IF                  = 16,
+    BEGIN_INSIDE        = 17,
+    END_INSIDE          = 18,
+    ABOVE_EQUAL         = 19,
+    BELOW_EQUAL         = 20,
+    ABOVE               = 21,
+    BELOW               = 22,
+    EQUAL               = 23,
+    NO_EQUAL            = 24,
 };
 
 struct NodeBinTree
@@ -49,7 +95,6 @@ struct BinTree
     NodeBinTree* root;
     int size;
     char* buf;
-//    Stack_Variable* variable;
 };
 
 enum BinTreeError

@@ -3,19 +3,37 @@
 #include "back-end.h"
 #include "../lib/STL_Graphviz/STL_graphviz.h"
 
-int main (const int /* argc */, const char** /* argv */)
+int main (const int argc, const char** argv)
 {
-    File file = { .name = "examples/1tree.cpp" };
+    const char* argv1 = 0;
+    const char* argv2 = 0;
+
+    if (argc <= 1) argv1 = "examples/1tree.cpp";
+    else argv1 = argv[1];
+
+    if (argc <= 2) argv2 = "examples/1asm.cpp";
+    else argv2 = argv[2];
+
+    File file = { .name = argv1 };
 
     BinTree* tree = BinTreeReadPostorderWithoutNil (&file);
-    if (tree == nullptr) printf ("TREE NULLPTR!!!\n\n");
+    if (tree == nullptr)
+    {
+        printf ("TREE NULLPTR!!!\n\n");
+        return 0;
+    }
 
-    STL_GraphvizBinTree (tree, 2);
+    STL_GraphvizBinTree (tree, after_back_end);
 
-    FILE* fp = fopen ("examples/1asm.cpp", "w");
+    FILE* fp = fopen (argv2, "w");
     assert (fp);
 
-    GetMultipleOperations (tree->root, fp);
+    BackEndCtx ctx = { .node = tree->root,
+                       .fp = fp,
+                       .nIf = 1,
+                       .nWhile = 1 };
+
+    CompileMultipleOperations (&ctx);
 
     fclose (fp);
 

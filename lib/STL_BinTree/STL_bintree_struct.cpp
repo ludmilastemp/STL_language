@@ -16,12 +16,6 @@ static NodeBinTree*
 ReadBranchNodeBinTreeWithoutNil (char* const buf,
                                  int* len);
 
-//static int
-//FindVariable (char* const buf, int* len, Stack_Variable* stk);
-
-//static int
-//StrlenVarName (char* buf);
-
 NodeBinTree*
 NodeBinTreeCtor (NodeBinTreeData* data,
                  NodeBinTree* left,
@@ -78,14 +72,6 @@ BinTreeCtor (NodeBinTree* root, int size, char* buf)
         return nullptr;
     }
 
-//    binTree->variable = (Stack_Variable*) calloc (1, sizeof (Stack_Variable));
-//    if (binTree->variable == nullptr)
-//    {
-//        printf ("ERROR_NOT_MEMORY\n");
-//        return nullptr;
-//    }
-//    StackCtor (binTree->variable);
-
     binTree->root = root;
     binTree->size = size;
     binTree->buf  = buf;
@@ -99,8 +85,7 @@ BinTreeDtor (BinTree* binTree)
     if (binTree == nullptr) return nullptr;
 
     NodeBinTreeDtor (binTree->root);
-    if (binTree->buf      != nullptr) free (binTree->buf);
-//    if (binTree->variable != nullptr) StackDtor (binTree->variable);
+    if (binTree->buf != nullptr) free (binTree->buf);
 
     binTree->root = nullptr;
     binTree->buf  = nullptr;
@@ -291,59 +276,3 @@ ReadBranchNodeBinTreeWithoutNil (char* const buf, int* len)
 
     return nullptr;
 }
-
-//static int
-//FindVariable (char* const buf, int* len, Stack_Variable* stk)
-//{
-//    if (buf == nullptr) return 0;
-//    if (len == nullptr) return 0;
-//    if (stk == nullptr) return 0;
-//
-//    int nameLen = StrlenVarName (buf + *len);
-//
-//    int nVar = 0;
-//    for (; nVar < stk->size; nVar++)
-//    {
-//        if (strncmp (stk->data[nVar].name, buf + *len, nameLen) == 0)
-//        {
-//            *len += nameLen;
-//            return nVar;
-//        }
-//    }
-//
-//    Variable var = { .name = buf + *len, .value = 0 };
-//
-//    StackPush (stk, var);
-//
-//    *len += nameLen;
-//
-//    return nVar;
-//}
-
-/// так как после переменной нет пробела,
-/// нельзя испольновать sscanf
-//static int
-//StrlenVarName (char* buf)
-//{
-//    int i = 0;
-//    while (true)
-//    {
-//        switch (*(buf + i))
-//        {
-//            case ')':    // возможно, тут нужна только скобка
-//            case '(':
-//            case '+':
-//            case '-':
-//            case '*':
-//            case '/':
-//            case '^':
-//            case SIN:
-//            case COS:
-//            case LN:
-//            {
-//                return i;
-//            }
-//        }
-//        i++;
-//    }
-//}

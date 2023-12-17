@@ -1,8 +1,13 @@
 #include "STL_spu.h"
 
-int main ()
+int main (const int argc, const char** argv)
 {
-    SPU ("examples/1bin.bin");
+    const char* argv1 = 0;
+
+    if (argc == 1) argv1 = "examples/1bin.bin";
+    else argv1 = argv[1];
+
+    SPU (argv1);
 
     printf ("\n\nEND!!!\n\n");
 

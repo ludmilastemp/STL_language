@@ -7,7 +7,7 @@
 char*
 STL_SpuErrPrint (int err);
 
-typedef int  SPU_DATA_TYPE;   /// не забудь поменять тип в стеке
+typedef int SPU_DATA_TYPE;   /// не забудь поменять тип в стеке
 typedef unsigned char OPCODE_T;
 
 const int nRegisters = 8;

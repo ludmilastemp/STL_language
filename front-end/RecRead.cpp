@@ -2,30 +2,45 @@
 
 /// TO DO: встретилось это, а ожидалось это
 
-typedef NodeBinTree* DATA_T; // Node
+static NodeBinTree* GetOperation  (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetCreate     (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetPrintf     (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetAssign     (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetIf         (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetCondition  (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetBodyCicle  (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetExspretion (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetTerm       (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetUnary      (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetPrimary    (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetNumber     (RecursiveDescentCtx* ctx);
 
-// Context             ctx
-//static DATA_T GetOperation  (RecursiveDescentCtx* ctx);
-static DATA_T GetOperation  (RecursDescent* ctx);
-static DATA_T GetCreate     (RecursDescent* recDescent);
-static DATA_T GetPrintf     (RecursDescent* recDescent);
-static DATA_T GetAssign     (RecursDescent* recDescent);
+static void LexicalAnalysisPass   (RecursiveDescentCtx* ctx);
+static int  FindVariable          (RecursiveDescentCtx* ctx);
+static void SkipSpaces            (RecursiveDescentCtx* ctx);
+static int  StrlenVarName         (const char* const buf);
 
-static void PassLexicalAnalysis (RecursDescent* recDescent); //pass in end
-//static int  FindVariable        (RecursDescent* recDescent);
-//static int  StrlenVarName       (const char* const buf);
-static void SkipSpace           (RecursDescent* recDescent);
+//static int NodeDataType          (RecursiveDescentCtx* ctx);
+static int NodeDataOpCode         (RecursiveDescentCtx* ctx);
+static int NodeDataVariable       (RecursiveDescentCtx* ctx);
+static NodeBinTreeData* NodeData  (RecursiveDescentCtx* ctx);
 
-DATA_T GetMultipleOperations (RecursDescent* recDescent)
+static NodeBinTree* NotThisFunc  (RecursiveDescentCtx* ctx,
+                                  const int pos);
+static NodeBinTree* NoMemoryError ();
+
+NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx)
 {
-    if (recDescent == nullptr) return nullptr;
+    if (ctx == nullptr) return nullptr;
 
-    DATA_T node  = GetOperation (recDescent);
-    DATA_T node2 = nullptr;
+    ctx->pos = 0;
 
-    while (recDescent->pos < recDescent->token->size)
+    NodeBinTree* node  = GetOperation (ctx);
+    NodeBinTree* node2 = nullptr;
+
+    while (ctx->pos < ctx->token->size)
     {
-        node2 = GetOperation (recDescent);
+        node2 = GetOperation (ctx);
         if (node2 == nullptr) break;
 
         node2->right = node;
@@ -35,132 +50,323 @@ DATA_T GetMultipleOperations (RecursDescent* recDescent)
     return node;
 }
 
-// small hren
 #define NODE_CTOR(data,x,y)  NodeBinTreeCtor (data, x, y)
-#define dataType             recDescent->token->data[recDescent->pos].type
-#define dataOpCode           recDescent->token->data[recDescent->pos].opCode
-#define dataVariable         recDescent->token->data[recDescent->pos].variable
-#define currentData          &recDescent->token->data[recDescent->pos]
 
-DATA_T GetOperation (RecursDescent* recDescent)
+static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
 {
-    if (recDescent == nullptr) return nullptr;
+    assert (ctx);
 
-    DATA_T node = nullptr;
+    NodeBinTree* node = nullptr;
 
-    node = GetCreate (recDescent);
-    if (node == nullptr) node = GetPrintf (recDescent);
-    if (node == nullptr) node = GetAssign (recDescent);
+    node = GetCreate (ctx);
+    if (node == nullptr) node = GetPrintf (ctx);
+    if (node == nullptr) node = GetIf     (ctx);
+    if (node == nullptr) node = GetAssign (ctx);
 
     if (node == nullptr)
     {
         printf ("\nERROR1 in GetOperation!!!\n\n");
-        printf ("\t\tpos = %d\n\n", recDescent->pos);
+        printf ("\t\tpos    = %d\n\n", ctx->pos);
+        printf ("\t\topCode = %d\n\n", NodeDataOpCode (ctx));
+
+                /// Dtor Node - TO DO
 
         return nullptr;
     }
 
-    if (dataOpCode != END_STR)
+    if (NodeDataOpCode (ctx) != END_STR)
     {
-        printf ("ERROR2 in GetOperation!!!\n\n");
+        printf ("ERROR in GetOperation!!!\n\n");
+        printf ("\t\tpos = %d\n\n", ctx->pos);
         return nullptr;
     }
 
-    node = NODE_CTOR (&recDescent->token->data[recDescent->pos],
+    node = NODE_CTOR (&ctx->token->data[ctx->pos],
                       node, nullptr);
-    recDescent->pos++;
+    ctx->pos++;
 
     return node;
 }
 
-//hren
-#define assertMemory(x)  if (x == nullptr)                         \
-                         {                                         \
-                             printf ("ERROR NO MEMORY!!!\n\n");    \
-                             return nullptr;                       \
-                         }
-
-// hren
-#define NotThisFunc      {                                         \
-                         recDescent->pos = oldPos;                 \
-                         return nullptr;                           \
-                         }
-
-DATA_T GetCreate (RecursDescent* recDescent)
-/// \Z \ni variable
+static NodeBinTree* GetCreate (RecursiveDescentCtx* ctx)
+    /// \Z \ni variable
 {
         /// очень неаккуратно выглядит
-    if (recDescent == nullptr) return nullptr;
+    assert (ctx);
 
-    int oldPos = recDescent->pos;
+    int oldPos = ctx->pos;
 
-    if (dataOpCode != T_INT) NotThisFunc;
+    if (NodeDataOpCode (ctx) != T_INT) return NotThisFunc (ctx, oldPos);
 
-    DATA_T node = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);/////!!!! RETURN_ON_NULL
-//    if ( !node ) return sytax_error(here);   <- function
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
 
-    recDescent->pos++;
+    if (NodeDataOpCode (ctx) != SYMBOL_NI) return NotThisFunc (ctx, oldPos);
+    ctx->pos++;
 
-    if (dataOpCode != SYMBOL_NI) NotThisFunc;
-    recDescent->pos++;
+    if (NodeDataVariable (ctx) == NodeBinTreeData::VARIABLE_POISON) return NotThisFunc (ctx, oldPos);
 
-    if (dataVariable == NodeBinTreeData::VARIABLE_POISON) NotThisFunc;
-
-    node->right = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);
-
-    recDescent->pos++;
+    node->right = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
 
     return node;
 }
 
-DATA_T GetPrintf (RecursDescent* recDescent)
-/// \gravo variable
+static NodeBinTree* GetPrintf (RecursiveDescentCtx* ctx)
+    /// \gravo variable
 {
-    if (recDescent == nullptr) return nullptr;
+    assert (ctx);
 
-    int oldPos = recDescent->pos;
+    int oldPos = ctx->pos;
 
-    if (dataOpCode != PRINTF) NotThisFunc;
+    if (NodeDataOpCode (ctx) != PRINTF) return NotThisFunc (ctx, oldPos);
 
-    DATA_T node = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);
-    recDescent->pos++;
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
 
-    if (dataVariable != 0) NotThisFunc;
+    if (NodeDataVariable (ctx) == NodeBinTreeData::VARIABLE_POISON) return NotThisFunc (ctx, oldPos);
 
-    node->right = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);
-    recDescent->pos++;
+    node->right = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
+
+    return node;
+}
+          // проверять по следующему токену - TO DO
+static NodeBinTree* GetAssign (RecursiveDescentCtx* ctx)
+    /// variable ::= eval
+{
+    assert (ctx);
+
+    int oldPos = ctx->pos;
+
+    if (NodeDataVariable (ctx) == NodeBinTreeData::VARIABLE_POISON) return NotThisFunc (ctx, oldPos);
+
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
+
+    if (NodeDataOpCode (ctx) != ASSING) return NotThisFunc (ctx, oldPos);
+
+    node = NODE_CTOR (NodeData (ctx), node, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
+
+    node->right = GetExspretion (ctx);
 
     return node;
 }
 
-DATA_T GetAssign (RecursDescent* recDescent)
-/// variable ::= value
+static NodeBinTree* GetIf (RecursiveDescentCtx* ctx)
+    /// Condition <=> Body
 {
-    if (recDescent == nullptr) return nullptr;
+    assert (ctx);
+    printf ("I in GetIf\n"
+            "\tpos = %d\n", ctx->pos);
 
-    int oldPos = recDescent->pos;
+    int oldPos = ctx->pos;
 
-    if (dataVariable != 0) NotThisFunc;
+    NodeBinTree* node1 = GetCondition (ctx);
 
-    DATA_T node = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);
-    recDescent->pos++;
+    printf ("\tpos = %d\n", ctx->pos);
+    if (node1 == nullptr) return NotThisFunc (ctx, oldPos);
 
-    if (dataOpCode != ASSING) NotThisFunc;
+    printf ("\tpos = %d\n", ctx->pos);
+    if (NodeDataOpCode (ctx) != IF) return NotThisFunc (ctx, oldPos);
 
-    node = NODE_CTOR (currentData, node, nullptr);
-    assertMemory (node);
-    recDescent->pos++;
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), node1, nullptr);
+    if (!node) return NoMemoryError();
 
-    if (dataType != NodeBinTreeData::T_VALUE) NotThisFunc;
+    node->right = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node->right) return NoMemoryError();
+    ctx->pos++;
 
-    node->right = NODE_CTOR (currentData, nullptr, nullptr);
-    assertMemory (node);
-    recDescent->pos++;
+    node->right->left = GetBodyCicle (ctx);
+
+    if (node->right->left == nullptr)
+    {
+        free (node->right);           /// так сделать везде
+        free (node);
+        return NotThisFunc (ctx, oldPos);
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetCondition (RecursiveDescentCtx* ctx)
+    /// \katarce усл \katapanma
+{
+    assert (ctx);
+    printf ("I in GetCondition\n");
+
+    int oldPos = ctx->pos;
+
+    printf ("\tpos = %d\n", ctx->pos);
+    if (NodeDataOpCode (ctx) != BEGIN_INSIDE) return NotThisFunc (ctx, oldPos);
+    ctx->pos++;
+
+    NodeBinTree* node1 = GetExspretion (ctx);
+    if (node1 == nullptr) return NotThisFunc (ctx, oldPos);
+
+    if (NodeDataOpCode (ctx) != ABOVE       &&
+        NodeDataOpCode (ctx) != ABOVE_EQUAL &&
+        NodeDataOpCode (ctx) != BELOW       &&
+        NodeDataOpCode (ctx) != BELOW_EQUAL &&
+        NodeDataOpCode (ctx) != EQUAL       &&
+        NodeDataOpCode (ctx) != NO_EQUAL)
+        return NotThisFunc (ctx, oldPos);
+
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), node1, nullptr);
+    if (!node) return NoMemoryError();
+    ctx->pos++;
+
+    node->right = GetExspretion (ctx);
+
+    printf ("\tpos = %d\n", ctx->pos);
+    if (node->right == nullptr)
+    {
+        free (node);
+        return NotThisFunc (ctx, oldPos);
+    }
+    printf ("\tpos = %d\n", ctx->pos);
+    printf ("\topC = %d\n", NodeDataOpCode (ctx));
+
+    if (NodeDataOpCode (ctx) != END_INSIDE) return NotThisFunc (ctx, oldPos);
+    ctx->pos++;
+    printf ("\tpos = %d\n", ctx->pos);
+
+    return node;
+}
+
+static NodeBinTree* GetBodyCicle (RecursiveDescentCtx* ctx)
+    /// \katarce multiple operations \katapanma
+{
+    assert (ctx);
+
+    int oldPos = ctx->pos;
+
+    if (NodeDataOpCode (ctx) != BEGIN_INSIDE) return NotThisFunc (ctx, oldPos);
+    ctx->pos++;
+
+    NodeBinTree* node  = GetOperation (ctx);
+    if (node == nullptr) return NotThisFunc (ctx, oldPos);
+
+    NodeBinTree* node2 = nullptr;
+
+    while (NodeDataOpCode (ctx) != END_INSIDE &&
+           ctx->pos < ctx->token->size)
+    {
+        node2 = GetOperation (ctx);
+        if (node2 == nullptr) break;
+
+        node2->right = node;
+        node = node2;
+    }
+
+    if (NodeDataOpCode (ctx) != END_INSIDE) return NotThisFunc (ctx, oldPos);
+    ctx->pos++;
+
+    return node;
+}
+
+static NodeBinTree* GetExspretion (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    NodeBinTree* node = GetTerm (ctx);
+
+    while (NodeDataOpCode (ctx) == ADD ||
+           NodeDataOpCode (ctx) == SUB)
+    {
+        node = NODE_CTOR (NodeData (ctx), node, nullptr);
+        if (!node) return NoMemoryError();
+        ctx->pos++;
+
+        node->right = GetTerm (ctx);
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetTerm (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    NodeBinTree* node = GetUnary (ctx);
+
+    while (NodeDataOpCode (ctx) == MUL ||
+           NodeDataOpCode (ctx) == DIV ||
+           NodeDataOpCode (ctx) == POW)
+    {
+        node = NODE_CTOR (NodeData (ctx), node, nullptr);
+
+        ctx->pos++;
+
+        node->right = GetUnary (ctx);
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetUnary (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    bool i = 0;
+
+    NodeBinTree* node = nullptr;
+
+    if (NodeDataOpCode (ctx) == SIN ||
+        NodeDataOpCode (ctx) == COS ||
+        NodeDataOpCode (ctx) == LN  ||
+        NodeDataOpCode (ctx) == SQRT)
+    {
+        node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+        ctx->pos++;
+        i = true;
+    }
+
+    NodeBinTree* node2 = GetPrimary (ctx);
+
+    if (i) node->right = node2;
+    else   node = node2;
+
+    return node;
+}
+
+static NodeBinTree* GetPrimary (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    if (NodeDataOpCode (ctx) == OPEN_PARENTHESIS)
+    {
+        ctx->pos++;
+
+        NodeBinTree* node = GetExspretion (ctx);
+
+        if (NodeDataOpCode (ctx) != CLOSE_PARENTHESIS)
+        {
+            printf ("NO CLOSE PARENTHESIS"
+                    "\n\tpos = %d\n", ctx->pos);
+            return nullptr;
+        }
+        ctx->pos++;
+
+        return node;
+    }
+
+    return GetNumber (ctx);
+}
+
+static NodeBinTree* GetNumber (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    ctx->pos++;
 
     return node;
 }
@@ -168,26 +374,32 @@ DATA_T GetAssign (RecursDescent* recDescent)
 #undef NODE_CTOR
 
 void
-LexicalAnalysis (RecursDescent* recDescent)
+LexicalAnalysis (RecursiveDescentCtx* ctx)
 {
-    if (recDescent == nullptr) return;
+    if (ctx == nullptr) return;
 
-    SkipSpace (recDescent);
+    SkipSpaces (ctx);
 
-    while (recDescent->str[recDescent->pos])
+    while (ctx->str[ctx->pos])
     {
-        PassLexicalAnalysis (recDescent);
+        LexicalAnalysisPass (ctx);
 
-        SkipSpace/*s*/ (recDescent);
+        SkipSpaces (ctx);
     }
 
     return;
 }
 
 static void
-PassLexicalAnalysis (RecursDescent* recDescent)
+LexicalAnalysisPass (RecursiveDescentCtx* ctx)
 {
-    if (recDescent == nullptr) return;
+    assert (ctx);
+    printf ("\n\nbegin LexicalAnalysisPass"
+            "\n\tsize = %d", ctx->token->size);
+    printf ("\n\tpos  = %d", ctx->pos);
+    printf ("\n\tstr  = %d", ctx->str[ctx->pos]);
+
+    if (ctx->token->size >= 40) assert (false);
 
     NodeBinTreeData data = { .type     = NodeBinTreeData::TYPE_POISON,
                              .value    = NodeBinTreeData::VALUE_POISON,
@@ -196,77 +408,88 @@ PassLexicalAnalysis (RecursDescent* recDescent)
 
     {
         /**
-         *
+         *  Parse keyword
          */
-         //
-        /// Get keyword/parse keyword
-       /////
         for (int i = 0; i < nOperation; i++)
         {
-            if (strncmp (recDescent->str + recDescent->pos, operation[i], lenOperation[i]) == 0)
+            if (strncmp (ctx->str + ctx->pos, operation[i], lenOperation[i]) == 0)
             {
+                printf ("\n\nFind KeyWord: opcode = %d", i);
                 data.type   = NodeBinTreeData::T_OPCODE;
                 data.opCode = i;
-                recDescent->pos += lenOperation[i];
+                ctx->pos += lenOperation[i];
 
-                StackPush (recDescent->token, data);
+                StackPush (ctx->token, data);
                 return;
             }
         }
     }
 
-    /// константа
-    int nLen = 0;
-    sscanf (recDescent->str + recDescent->pos, BIN_TREE_DATA_VALUE_PRINT_SPECIFIER "%n", &data.value, &nLen);
-    if (nLen)
     {
-        data.type = NodeBinTreeData::T_VALUE;
-        recDescent->pos += nLen;
+        /**
+         *  Pass constant
+         */
+        int nLen = 0;
+        sscanf (ctx->str + ctx->pos, BIN_TREE_DATA_VALUE_PRINT_SPECIFIER "%n", &data.value, &nLen);
+        if (nLen)
+        {
+            data.type = NodeBinTreeData::T_VALUE;
+            ctx->pos += nLen;
 
-        StackPush (recDescent->token, data);
-        return;
+            StackPush (ctx->token, data);
+            return;
+        }
     }
 
-/// переменная
-    if (recDescent->str [recDescent->pos] == 'x')
     {
+        /**
+         *  Parse variable
+         */
         data.type     = NodeBinTreeData::T_VARIABLE;
-        data.variable = 0;
-        recDescent->pos++;
+        data.variable = FindVariable (ctx);
 
-        StackPush (recDescent->token, data);
+        StackPush (ctx->token, data);
         return;
     }
-//    data.variable = FindVariable (recDescent);
 
-    printf ("ERROR in PassLexicalAnalysis\n\n");
+    printf ("ERROR in LexicalAnalysisPass\n\n");
 
     return;
 }
-                 /*
-static int
-FindVariable (RecursDescent* recDescent)
-{
-    if (recDescent == nullptr) return 0;
 
-    int nameLen = StrlenVarName (recDescent->str + recDescent->pos);
+static int
+FindVariable (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    int nameLen = StrlenVarName (ctx->str + ctx->pos);
 
     int variable = 0;
-    for (; variable < recDescent->var->size; variable++)
+    for (; variable < ctx->var->size; variable++)
     {
-        if (strncmp (recDescent->var->data[variable].name, recDescent->str + recDescent->pos, nameLen) == 0)
+        if (strncmp (ctx->var->data[variable].name, ctx->str + ctx->pos, nameLen) == 0)
         {
-            recDescent->pos += nameLen;
+    printf ("\n\nНайдена переменная: \n"
+            "\tlen = %d\n"
+            "\tname = ", nameLen);
+    for (int i = 0; i < nameLen; i++) printf ("%c", ctx->str[ctx->pos]);
+
+            ctx->pos += nameLen;
 
             return variable;
         }
     }
 
-    Variable var = { .name = recDescent->str + recDescent->pos, .value = 0 };
+    Variable var = { .name = ctx->str + ctx->pos, .len = nameLen };
 
-    StackPush (recDescent->var, var);
+    printf ("\n\nНайдена новая переменная: \n"
+            "\tlen = %d\n"
+            "\tname = ", nameLen);
+    for (int i = 0; i < nameLen; i++) printf ("%c", ctx->str[ctx->pos]);
 
-    recDescent->pos += nameLen;
+    StackPush (ctx->var, var);
+
+    ctx->pos += nameLen;
 
     return variable;
 }
@@ -277,48 +500,95 @@ static int
 StrlenVarName (const char* const buf)
 {
     int i = 0;     // for
+                   // isalpha
     while (true)
     {
         switch (*(buf + i))
         {
             case ')':
             case '(':
+            case '{':
+            case '}':
             case '+':
             case '-':
             case '*':
             case '/':
             case '^':
+            case '<':
+            case '>':
+            case '=':
             case ' ':
-            case SIN:
-            case COS:
-            case LN:
-            {
+            case '\t':
+            case '\n':
+
                 return i;
-            }
+
+            default:
+
+                break;
         }
         i++;
     }
-}*/
+}
 
 static void
-SkipSpace (RecursDescent* recDescent)
+SkipSpaces (RecursiveDescentCtx* ctx)
 {
-    if (recDescent == nullptr) return;
+    assert (ctx);
 
-    while (isspace (recDescent->str[recDescent->pos])) recDescent->pos++;
+    while (isspace (ctx->str[ctx->pos])) ctx->pos++;
 
-    static int lastMAGIC = 0; // move it from this place enable/disable
+    /// TO DO это все должно быть в отдельной функции
+//    static int lastMAGIC = 0; // move it from this place enable/disable
+//
+//    if (strncmp (ctx->str + ctx->pos, MAGIC, sizeof (MAGIC) - 1) == 0)
+//    {
+//        lastMAGIC = 0;
+//        ctx->pos += sizeof (MAGIC) - 1;
+//    }
+//    else if (lastMAGIC++ == IHavePawsPeriod)
+//    {
+//        printf ("\n\n\nI have paws! I don't want to work!!!\n\n");
+//        return;
+//    }
 
-    if (strncmp (recDescent->str + recDescent->pos, MAGIC, sizeof (MAGIC) - 1) == 0)
-    {
-        lastMAGIC = 0;
-        recDescent->pos += sizeof (MAGIC) - 1;
-    }
-    else if (lastMAGIC++ == IHavePaws)
-    {
-        printf ("\n\n\nI have paws! I don't want to work!!!\n\n");
-        return;
-    }
+    while (isspace (ctx->str[ctx->pos])) ctx->pos++;
+}
+    // in BinTreeStruct.cpp - ?
+//static int NodeDataType (RecursiveDescentCtx* ctx)
+//{
+//    assert (ctx);
+//    return ctx->token->data[ctx->pos].type;
+//}
 
-    while (isspace (recDescent->str[recDescent->pos])) recDescent->pos++;
+static int NodeDataOpCode (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+    return ctx->token->data[ctx->pos].opCode;
+}
+
+static int NodeDataVariable (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+    return ctx->token->data[ctx->pos].variable;
+}
+
+static NodeBinTreeData* NodeData (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+    return &ctx->token->data[ctx->pos];
+}
+
+static NodeBinTree* NoMemoryError ()
+{
+    printf ("ERROR NO MEMORY!!!\n\n");
+    return nullptr;
+}
+
+static NodeBinTree* NotThisFunc (RecursiveDescentCtx* ctx,
+                                 const int pos)
+{
+    assert (ctx);
+    ctx->pos = pos;
+    return nullptr;
 }

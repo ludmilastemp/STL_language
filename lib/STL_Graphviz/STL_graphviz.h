@@ -10,6 +10,12 @@
 
 #include "../../lib/STL_Bintree/STL_bintree_struct.h"
 
+enum
+{
+    after_front_end = 1,
+    after_back_end  = 2,
+};
+
 void
 STL_GraphvizBinTree (BinTree* binTree, const int file);
 

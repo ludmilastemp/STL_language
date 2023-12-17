@@ -22,7 +22,6 @@ char* STL_Fread (struct File* file)
 
     file->size = fread (file->text, sizeof (char), file->size, file->fp);
 
-
     // git undo commit
     // git diff <>
     /**

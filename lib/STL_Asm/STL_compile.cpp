@@ -16,16 +16,16 @@ static int ParseArgs (const char* string,
                       Stack_Label* labels,
                       Stack_Fixup* fixups);
 
-static unsigned char CheckArgIsLabel (const char* string,
-                             bool* checkLabel);
+static OPCODE_T CheckArgIsLabel (const char* string,
+                                 bool* checkLabel);
 
-static unsigned char CheckArgIsRam   (const char** string);
+static OPCODE_T CheckArgIsRam   (const char** string);
 
-static unsigned char CheckArgIsImm   (const char** string,
-                             int* arg);
+static OPCODE_T CheckArgIsImm   (const char** string,
+                                 int* arg);
 
-static unsigned char CheckArgIsReg   (const char* string,
-                             int* reg);
+static OPCODE_T CheckArgIsReg   (const char* string,
+                                 int* arg);
 
 static int EmitOpcode (const OPCODE_T opCode,
                        NewString* strByte);
@@ -187,7 +187,6 @@ static int ParseArgs (const char* string,
     int  reg   = 0;
     bool checkLabel = 0;
 
-/// кринж
 /// warning: conversion to 'OPCODE_T {aka unsigned char}'
 /// from 'int' may alter its value [-Wconversion]
     opCode = opCode | CheckArgIsLabel (string, &checkLabel);
@@ -218,8 +217,8 @@ static int ParseArgs (const char* string,
     return 0;
 }
 
-static unsigned char CheckArgIsLabel (const char* string,
-                            bool* checkLabel)
+static OPCODE_T CheckArgIsLabel (const char* string,
+                                 bool* checkLabel)
 {
     assert (string);
     assert (checkLabel);
@@ -233,7 +232,7 @@ static unsigned char CheckArgIsLabel (const char* string,
     return 0;
 }
 
-static unsigned char CheckArgIsRam (const char** string)
+static OPCODE_T CheckArgIsRam (const char** string)
 {
     assert (string);
     assert (*string);
@@ -247,8 +246,8 @@ static unsigned char CheckArgIsRam (const char** string)
     return 0;
 }
 
-static unsigned char CheckArgIsImm (const char** string,
-                          int* arg)
+static OPCODE_T CheckArgIsImm (const char** string,
+                               int* arg)
 {
     assert (string);
     assert (*string);
@@ -276,8 +275,8 @@ static unsigned char CheckArgIsImm (const char** string,
         return T_ARG_REG;                                               \
     }
 
-static unsigned char CheckArgIsReg (const char* string,
-                          int* reg)
+static OPCODE_T CheckArgIsReg (const char* string,
+                               int* reg)
 {
     assert (string);
     assert (reg);

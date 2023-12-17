@@ -41,6 +41,13 @@ DEF_CMD (DIV, 0x06, 0,
     DO_PUSH (var1 * floatPrecision / var2);
     })
 
+DEF_CMD (POW, 0x11, 0,
+    {
+    DO_POP (&var2);
+    DO_POP (&var1);
+    DO_PUSH ((int) (pow (var1 / floatPrecision, var2 / floatPrecision) * floatPrecision));
+    })
+
 DEF_CMD (SQRT, 0x07, 0,
     {
     DO_POP (&var1);
@@ -56,6 +63,11 @@ DEF_CMD (SIN, 0x08, 0,
 DEF_CMD (COS, 0x09, 0, {
     DO_POP (&var1);
     DO_PUSH ((int)(cos(var1 / floatPrecision) * floatPrecision));
+    })
+
+DEF_CMD (LN, 0x10, 0, {
+    DO_POP (&var1);
+    DO_PUSH ((int)(log(var1 / floatPrecision) * floatPrecision));
     })
 
 DEF_CMD (IN, 0x0A, 0,

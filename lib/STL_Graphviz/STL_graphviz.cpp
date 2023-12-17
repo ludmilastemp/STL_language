@@ -25,8 +25,8 @@ void STL_GraphvizBinTree (BinTree* tree, const int file)
 
     fclose (fp);
 
-    if (file == 1) system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL1.png");
-    if (file == 2) system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL2.png");
+    if (file == after_front_end) system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL1.png");
+    if (file == after_back_end)  system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL2.png");
 }
 
 static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_Variable* stk)
@@ -53,8 +53,8 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 
         case NodeBinTreeData::T_VARIABLE:
 
-            pr (" [ label = \"x\", \
-            fillcolor = \"#FFE0FF\", color = \"#FFA0FF\" ]\n");//, stk->data[node->data->variable].name);
+            pr (" [ label = \"var%d\", \
+            fillcolor = \"#FFE0FF\", color = \"#FFA0FF\" ]\n", node->data->variable + 1);
 
             break;
 

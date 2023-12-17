@@ -17,20 +17,18 @@
 #include "../lib/STL_Stack/generic.h"
 
 const char MAGIC[] = "meow";
-//const int  IHavePawsPeriod = 15;
-const int  IHavePaws = 15;
+const int  IHavePawsPeriod = 150;
 
-struct RecursDescent
+struct RecursiveDescentCtx
 {
     char* str;
     int pos;
-    int error;
     Stack_Variable* var;
     Stack_NodeBinTreeData* token;
 };
 
-void LexicalAnalysis (RecursDescent* recDescent);
+void LexicalAnalysis (RecursiveDescentCtx* ctx);
 
-NodeBinTree* GetMultipleOperations (RecursDescent* recDescent);
+NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx);
 
 #endif /* STL_RecRead_ */

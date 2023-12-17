@@ -1,98 +1,313 @@
 #include "back-end.h"
 
-enum {error in getoperation, ...}
+static int CompileOperation (BackEndCtx* ctx);
+static int CompilePrintf    (BackEndCtx* ctx);
+static int CompileAssign    (BackEndCtx* ctx);
+static int CompileIf        (BackEndCtx* ctx);
+static int CompileCreate    (BackEndCtx* ctx);
+static int CompileEval      (BackEndCtx* ctx);
 
-static int GetOperation  (NodeBinTree* node, FILE* fp);      // {emit} compile
-static int GetPrintf     (NodeBinTree* node, FILE* fp);
-static int GetAssign     (NodeBinTree* node, FILE* fp);
-static int GetCreate     (NodeBinTree* node, FILE* fp);
-
-int GetMultipleOperations (NodeBinTree* node, FILE* fp)
+int CompileMultipleOperations (BackEndCtx* ctx)
 {
-    if (node == nullptr || fp == nullptr) return 1;
+    assert (ctx);
 
-    while (node != nullptr)
+    NodeBinTree* oldNode = ctx->node;
+
+    while (oldNode != nullptr)
     {
-        if (node->data->opCode != END_STR)
+        if (oldNode->data->opCode != END_STR)
         {
-            printf ("ERROR in GetMultipleOperations!!!\n\n");
-            return 1;
+            printf ("ERROR in CompileMultipleOperations!!!\n\n");
+            return ERROR_IN_CompileMultipleOperations;
         }
 
-        GetOperation (node->left, fp);
-        node = node->right;
+        ctx->node = oldNode->left;
+        CompileOperation (ctx);
+
+        oldNode = oldNode->right;
     }
 
     return 0;
 }
 
-static int GetOperation (NodeBinTree* node, FILE* fp)
+static int CompileOperation (BackEndCtx* ctx)
 {
-    if (node == nullptr || fp == nullptr) return 1;
+    assert (ctx);
+//    printf ("\n\nI in CompileOperation\n");
 
-//    int check = 1;
-//    check = check && GetPrintf (node, fp);
-//    check = check && GetAssign (node, fp);
-//    check = check && GetCreate (node, fp);
-
-    if ( GetPrintf (node, fp)
-         && GetAssign (node, fp)
-         && GetCreate (node, fp) )
+    if (CompilePrintf (ctx) &&
+        CompileIf     (ctx) &&
+        CompileAssign (ctx) &&
+        CompileCreate (ctx))
     {
-        printf ("\nERROR in GetOperation!!!\n\n");
+
+        printf ("\nERROR in CompileOperation!!!\n\n");
 
         printf ("\n\ttype     = %d\
                  \n\tvalue    = %d\
                  \n\topCode   = %d\
                  \n\tvariable = %d",
-                 node->data->type,
-                 node->data->value,
-                 node->data->opCode,
-                 node->data->variable);
-        return 1;
+                 ctx->node->data->type,
+                 ctx->node->data->value,
+                 ctx->node->data->opCode,
+                 ctx->node->data->variable);
+        return ERROR_IN_CompileOperation;
     }
 
-//    if (check == 1)
-//    {
-//    }
+//    printf ("I end CompileOperation\n\n\n");
 
     return 0;
 }
 
-static int GetPrintf (NodeBinTree* node, FILE* fp)
+static int CompilePrintf (BackEndCtx* ctx)
 {
-    if (node == nullptr || fp == nullptr) return 1;
+    assert (ctx);
+//    printf ("I in CompilePrintf\n");
 
-    if (node->data->opCode   != PRINTF) return 1;
-    node = node->left;
+    if (ctx->node->      data->opCode   != PRINTF ||
+        ctx->node->left->data->variable == NodeBinTreeData::VARIABLE_POISON)
+        return ERROR_IN_CompilePrintf;
 
-    if (node->data->variable != 0) return 1;
-
-    fprintf (fp, "\n\t\tpush rax\
-                  \n\t\tOUT");
+    fprintf (ctx->fp, "\n\t\tpush [%d]"
+                  "\n\t\tOUT", ctx->node->left->data->variable);
 
     return 0;
 }
 
-static int GetAssign (NodeBinTree* node, FILE* fp)
+static int CompileIf (BackEndCtx* ctx)
 {
-    if (node == nullptr || fp == nullptr) return 1;
-       // one if
-    if (node       ->data->opCode   != ASSING) return 1;
-    if (node->right->data->type     != NodeBinTreeData::T_VALUE) return 1;
-    if (node->left ->data->variable != 0) return 1;
+    assert (ctx);
+//    printf ("I in CompileIf\n");
 
-    fprintf (fp, "\n\t\tpush %d\
-                  \n\t\tpop rax", node->right->data->value);
+    if (ctx->node->data->opCode != IF) return ERROR_IN_CompileIf;
+
+    NodeBinTree* oldNode = ctx->node;
+
+    ctx->node = oldNode->left->left;
+    CompileEval (ctx);
+
+    ctx->node = oldNode->left->right;
+    CompileEval (ctx);
+
+    switch (oldNode->left->data->opCode)
+    {
+        case ABOVE:
+
+            fprintf (ctx->fp, "\n\t\tja");
+
+            break;
+
+        case ABOVE_EQUAL:
+
+            fprintf (ctx->fp, "\n\t\tjae");
+
+            break;
+
+        case BELOW:
+
+            fprintf (ctx->fp, "\n\t\tjb");
+
+            break;
+
+        case BELOW_EQUAL:
+
+            fprintf (ctx->fp, "\n\t\tjbe");
+
+            break;
+
+        case EQUAL:
+
+            fprintf (ctx->fp, "\n\t\tje");
+
+            break;
+
+        case NO_EQUAL:
+
+            fprintf (ctx->fp, "\n\t\tjne");
+
+            break;
+
+        default:
+
+            return ERROR_IN_CompileIf;
+    }
+
+                  /// const
+    fprintf (ctx->fp, " :if_1"
+                 "\n\t\tjmp :else_1");
+
+    fprintf (ctx->fp, "\n\n:if_1");
+
+
+    ctx->node = oldNode->right->left;
+    CompileMultipleOperations (ctx);
+
+    fprintf (ctx->fp, "\n\t\tjmp :end_if_1");
+
+    fprintf (ctx->fp, "\n\n:else_1");
+    if (oldNode->right->right != nullptr)
+    {
+        ctx->node = oldNode->right->right;
+        CompileMultipleOperations (ctx);
+    }
+
+    fprintf (ctx->fp, "\n\n:end_if_1");
+
+    ctx->node = oldNode;
 
     return 0;
 }
 
-static int GetCreate (NodeBinTree* node, FILE* fp)
+static int CompileAssign (BackEndCtx* ctx)
 {
-    if (node == nullptr || fp == nullptr) return 1;
+    assert (ctx);
+//    printf ("I in CompileAssign\n");
 
-    if (node->data->opCode != T_INT) return 1;
+    if (ctx->node      ->data->opCode   != ASSING ||
+        ctx->node->left->data->variable == NodeBinTreeData::VARIABLE_POISON)
+        return ERROR_IN_CompileAssign;
+
+    NodeBinTree* oldNode = ctx->node;
+
+    ctx->node = oldNode->right;
+    CompileEval (ctx);
+
+    fprintf (ctx->fp, "\n\t\tpop [%d]\n", oldNode->left->data->variable);
+
+    ctx->node = oldNode;
+
+    return 0;
+}
+
+static int CompileCreate (BackEndCtx* ctx)
+{
+    assert (ctx);
+//    printf ("I in CompileCreate\n");
+
+    if (ctx->node->data->opCode != T_INT)
+        return ERROR_IN_CompileCreate;
+
+    return 0;
+}
+
+static int CompileEval (BackEndCtx* ctx)
+{
+    NodeBinTree* oldNode = ctx->node;
+
+    ctx->node = oldNode->left;
+    if (ctx->node != nullptr) CompileEval (ctx);
+
+    ctx->node = oldNode->right;
+    if (ctx->node != nullptr) CompileEval (ctx);
+
+    ctx->node = oldNode;
+
+    switch (ctx->node->data->type)
+    {
+        case NodeBinTreeData::T_VALUE:
+
+            fprintf (ctx->fp, "\n\t\tpush %d", ctx->node->data->value);
+
+            break;
+
+        case NodeBinTreeData::T_VARIABLE:
+
+            fprintf (ctx->fp, "\n\t\tpush [%d]", ctx->node->data->variable);
+
+            break;
+
+        case NodeBinTreeData::T_OPCODE:
+
+            switch (ctx->node->data->opCode)
+            {
+                case ADD:
+
+                    fprintf (ctx->fp, "\n\t\tadd");
+
+                    break;
+
+                case SUB:
+
+                    fprintf (ctx->fp, "\n\t\tsub");
+
+                    break;
+
+                case MUL:
+
+                    fprintf (ctx->fp, "\n\t\tmul");
+
+                    break;
+
+                case DIV:
+
+                    fprintf (ctx->fp, "\n\t\tdiv");
+
+                    break;
+
+                case SQRT:
+
+                    fprintf (ctx->fp, "\n\t\tsqrt");
+
+                    break;
+
+                case POW:
+
+                    fprintf (ctx->fp, "\n\t\tpow");
+
+                    break;
+
+                case SIN:
+
+                    fprintf (ctx->fp, "\n\t\tsin");
+
+                    break;
+
+                case COS:
+
+                    fprintf (ctx->fp, "\n\t\tcos");
+
+                    break;
+
+                case LN:
+
+                    fprintf (ctx->fp, "\n\t\tln");
+
+                    break;
+        //
+        //        case ADD:
+        //
+        //            fprintf (ctx->fp, "\n\t\tadd");
+        //
+        //            break;
+        //
+        //        case ADD:
+        //
+        //            fprintf (ctx->fp, "\n\t\tadd");
+        //
+        //            break;
+        //
+        //        case ADD:
+        //
+        //            fprintf (ctx->fp, "\n\t\tadd");
+        //
+        //            break;
+        //
+        //        case ADD:
+        //
+        //            fprintf (ctx->fp, "\n\t\tadd");
+        //
+        //            break;
+                default:
+                    printf ("ERROR in CompileEval\n"
+                            "opCode = %d\n", ctx->node->data->opCode);
+            }
+
+            break;
+
+        default:
+            printf ("ERROR in CompileEval\n"
+                    "type = %d\n", ctx->node->data->type);
+    }
 
     return 0;
 }

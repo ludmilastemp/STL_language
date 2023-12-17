@@ -17,7 +17,6 @@ static int VideoMemory (const int length, const int width);
 static int ReadFile (char** str, const char* const fileName, int* ip);
 
 // #define verified  || AssertFailed ((__LINE__)
-
 // #define verified  || ({ return 1; })
 
 int SPU (const char* fileName)
@@ -33,7 +32,7 @@ int SPU (const char* fileName)
         return ERROR_FILE_FORMAT;
     }
 
-    Execute (str, ip); // == 0 onerror_ret;
+    Execute (str, ip);
 
     free (str);
 
