@@ -1,28 +1,35 @@
 
+:main
 		push 3
 		pop [0]
 
 		push [0]
-		sin
+		push 3
+		mul
+		OUT
+
+		call :func_0_
+
+		push rax
 		pop [0]
-
-
-:while_1_condition
-		push [0]
-		push 7
-		jbe :while_1_body
-		jmp :while_1_end
-
-:while_1_body
-		push [0]
-		push 5
-		add
-		pop [0]
-
-		jmp :while_1_condition
-
-:while_1_end
-
 
 		push [0]
 		OUT
+
+		hlt
+
+:func_0_
+		push 13
+		pop [0]
+
+		push 512
+		OUT
+
+		push [0]
+		push 1
+		add
+		pop rax
+
+		ret
+
+		ret

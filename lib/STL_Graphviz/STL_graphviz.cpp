@@ -33,6 +33,16 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 {
     fprintf (fp, "\nf%d", *num);
 
+    if (node == nullptr)
+    {
+        pr (" [ label = nil, \
+        fillcolor = \"#FFE0E0\", color = \"#FFA0A0\" ]\n");
+
+        (*num)++;
+
+        return;
+    }
+
     int curNum = *num;
 
     switch (node->data->type)
@@ -58,6 +68,13 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 
             break;
 
+        case NodeBinTreeData::T_FUNCTION:
+
+            pr (" [ label = \"func%d\", \
+            fillcolor = \"#FFE0DD\", color = \"#FFA0DD\" ]\n", node->data->function + 1);
+
+            break;
+
         default:
             printf ("\nGraphviz error\nnum = %d\ttype = %d", *num, node->data->type);
             printf ("\
@@ -74,13 +91,15 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 
     (*num)++;
 
-    if (node->left != nullptr)
+//    if (node->left != nullptr)
+    if (node != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->left, num);//, stk);
     }
 
-    if (node->right != nullptr)
+//    if (node->right != nullptr)
+    if (node != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->right, num);//, stk);

@@ -1,12 +1,16 @@
 #include "RecRead.h"
 
 /// TO DO: встретилось это, а ожидалось это
+/// начать чекать тип
 
 /**
+ * Function     := '\oed' MultipleOperations '\lemma' ~nameFunc~
  * MultipleOperations := {Op}+
- * Op           := {Create | Print | If | Assign } ':)'
+ * Op           := {CallFunc | FuncReturn | Create | Print | If | Assign } ':)'
+ * CallFunc     := ':(' ~func~ '):'
+ * FuncReturn   := '(:' [ Expression ]
  * Create       := '\Z' '\in' ~var~
- * Print        := '\gravo' ~var~
+ * Print        := '\gravo' Expression
  * Assign       := ~var~ '::=' Eval
  * ConditionOp  := Cond ['<=>' '<?=?>'] Body
  * Cond         := '\katarce' Eval                           \
@@ -16,14 +20,17 @@
  * Term         := Unary {['*' '/'] Unary}*
  * Unary        := ['sin' 'cos' 'ln' 'sqrt' ''] Primary
  * Primary      := '('Expression ')' | Number
- * Number       := ['0' - '9']+
- */
+ * Number       := ['0' - '9']+ | ~var~ | CallFunc
+ */        /// no Number
 
+static NodeBinTree* GetFunction    (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetOperation   (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetCreate      (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetPrintf      (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetAssign      (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetCallFunc    (RecursiveDescentCtx* ctx);
+static NodeBinTree* GetFuncReturn  (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetConditionOp (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetCondition   (RecursiveDescentCtx* ctx);
 static NodeBinTree* GetBodyCicle   (RecursiveDescentCtx* ctx);
@@ -35,11 +42,14 @@ static NodeBinTree* GetNumber      (RecursiveDescentCtx* ctx);
 
 static void LexicalAnalysisPass    (RecursiveDescentCtx* ctx);
 static void SkipSpaces             (RecursiveDescentCtx* ctx);
+static int  FindFunction           (RecursiveDescentCtx* ctx);
 static int  FindVariable           (RecursiveDescentCtx* ctx);
-static int  StrlenVarName          (const char* const buf);
+static int  FindName               (RecursiveDescentCtx* ctx, Stack_Variable* stk);
+static int  StrlenName             (const char* const buf);
 
-//static int NodeDataType           (RecursiveDescentCtx* ctx);
+static int NodeDataType            (RecursiveDescentCtx* ctx);
 static int NodeDataOpCode          (RecursiveDescentCtx* ctx);
+static int NodeDataFunction        (RecursiveDescentCtx* ctx);
 static int NodeDataVariable        (RecursiveDescentCtx* ctx);
 static NodeBinTreeData* NodeData   (RecursiveDescentCtx* ctx);
 
@@ -47,13 +57,88 @@ static NodeBinTree* NotThisFunc    (RecursiveDescentCtx* ctx,
                                     const int pos);
 static NodeBinTree* NoMemoryError ();
 
+#define NODE_CTOR(data,x,y)  NodeBinTreeCtor (data, x, y)
+
 NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx)
 {
     if (ctx == nullptr) return nullptr;
 
     ctx->pos = 0;
 
-    NodeBinTree* node = GetMultipleOperations (ctx);
+    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+    if (!node) return NoMemoryError();
+
+    node->data->type     = NodeBinTreeData::T_FUNCTION;
+    node->data->function = NodeBinTreeData::FUNCTION_POISON;
+
+    ctx->pos++;
+
+    node->left = GetMultipleOperations (ctx);
+
+    if (NodeDataOpCode (ctx) != MAIN)
+    {
+        /// free!!!!!!!!
+        return nullptr;      /// not this function - ?
+    }
+    ctx->pos++;
+
+    NodeBinTree* node1 = node;
+
+    while (ctx->pos < ctx->token->size)
+    {
+        node1->right = GetFunction (ctx);
+        if (node1 == nullptr) break;
+
+        node1 = node1->right;
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetFunction (RecursiveDescentCtx* ctx)
+{
+    /**
+     * Function := '\oed' MultipleOperations '\lemma' ~nameFunc~
+     */
+    assert (ctx);
+
+    int oldPos = ctx->pos;
+    NodeBinTree* node  = nullptr;
+
+    {
+        /**
+         * '\oed'
+         */
+        if (NodeDataOpCode (ctx) != END_FUNCTION) return NotThisFunc (ctx, oldPos);
+        ctx->pos++;
+    }
+
+    {
+        /**
+         * MultipleOperations
+         */
+        node = GetMultipleOperations (ctx);
+        if (node == nullptr) return NotThisFunc (ctx, oldPos);
+    }
+
+    {
+        /**
+         * '\lemma'
+         */
+        if (NodeDataOpCode (ctx) != BEGIN_FUNCTION) return NotThisFunc (ctx, oldPos);
+        ctx->pos++;
+    }
+
+    {
+        /**
+         * ~nameFunc~
+         */
+        if (NodeDataFunction (ctx) == NodeBinTreeData::FUNCTION_POISON) return NotThisFunc (ctx, oldPos);
+
+        node = NODE_CTOR (NodeData (ctx), node, nullptr);
+        if (!node) return NoMemoryError();
+        ctx->pos++;
+    }
 
     return node;
 }
@@ -70,7 +155,9 @@ static NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx)
 
     NodeBinTree* node2 = nullptr;
 
-    while (ctx->pos < ctx->token->size &&
+    while (NodeDataOpCode (ctx) != MAIN           &&
+           NodeDataOpCode (ctx) != BEGIN_FUNCTION &&
+           NodeDataOpCode (ctx) != END_FUNCTION   &&
            NodeDataOpCode (ctx) != END_INSIDE)
     {
         node2 = GetOperation (ctx);
@@ -83,12 +170,10 @@ static NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx)
     return node;
 }
 
-#define NODE_CTOR(data,x,y)  NodeBinTreeCtor (data, x, y)
-
 static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
 {
     /**
-     * Op := {Create | Print | If | Assign} ':)'
+     * Op := { CallFunc | FuncReturn | Create | Print | If | Assign} ':)'
      */
     assert (ctx);
 
@@ -96,9 +181,11 @@ static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
 
     {
         /**
-         * Create | Print | If | Assign
+         * CallFunc | FuncReturn | Create | Print | If | Assign
          */
-        node = GetCreate (ctx);
+        node = GetCallFunc (ctx);
+        if (node == nullptr) node = GetFuncReturn  (ctx);
+        if (node == nullptr) node = GetCreate      (ctx);
         if (node == nullptr) node = GetPrintf      (ctx);
         if (node == nullptr) node = GetConditionOp (ctx);
         if (node == nullptr) node = GetAssign      (ctx);
@@ -107,7 +194,17 @@ static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
         {
             printf ("\nERROR1 in GetOperation!!!\n\n");
             printf ("\t\tpos    = %d\n\n", ctx->pos);
-            printf ("\t\topCode = %d\n\n", NodeDataOpCode (ctx));
+
+            printf ("\n\ttype     = %d"
+                    "\n\tvalue    = %d"
+                    "\n\topCode   = %d"
+                    "\n\tvariable = %d"
+                    "\n\tfunction = %d\n",
+                     ctx->token->data[ctx->pos].type,
+                     ctx->token->data[ctx->pos].value,
+                     ctx->token->data[ctx->pos].opCode,
+                     ctx->token->data[ctx->pos].variable,
+                     ctx->token->data[ctx->pos].function);
 
                     /// Dtor Node - TO DO
 
@@ -129,6 +226,80 @@ static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
         node = NODE_CTOR (&ctx->token->data[ctx->pos],
                           node, nullptr);
         ctx->pos++;
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetCallFunc (RecursiveDescentCtx* ctx)
+{
+    /**
+     * CallFunc := ':(' ~func~ '):'
+     */
+    assert (ctx);
+
+    int oldPos = ctx->pos;
+    NodeBinTree* node  = nullptr;
+
+    {
+        /**
+         * ':('
+         */
+        if (NodeDataOpCode (ctx) != BEGIN_PARAM_FUNC) return NotThisFunc (ctx, oldPos);
+        ctx->pos++;
+    }
+
+    {
+        /**
+         * ~func~
+         */
+        if (NodeDataFunction (ctx) == NodeBinTreeData::FUNCTION_POISON) return NotThisFunc (ctx, oldPos);
+
+        node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+        if (!node) return NoMemoryError();
+        ctx->pos++;
+    }
+
+    {
+        /**
+         * '):'
+         */
+        if (NodeDataOpCode (ctx) != END_PARAM_FUNC) return NotThisFunc (ctx, oldPos);
+        ctx->pos++;
+    }
+
+    return node;
+}
+
+static NodeBinTree* GetFuncReturn (RecursiveDescentCtx* ctx)
+{
+    /**
+     * FuncReturn := '(:' Expression
+     */
+    assert (ctx);
+
+    int oldPos = ctx->pos;
+    NodeBinTree* node  = nullptr;
+
+    {
+        /**
+         * '(:'
+         */
+        if (NodeDataOpCode (ctx) != FUNC_RETURN) return NotThisFunc (ctx, oldPos);
+
+        node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+        if (!node) return NoMemoryError();
+        ctx->pos++;
+    }
+
+    {
+        /**
+         * Expression
+         */
+        if (NodeDataType (ctx) != END_STR)
+        {
+            node->right = GetExpression (ctx);
+        }
     }
 
     return node;
@@ -181,7 +352,7 @@ static NodeBinTree* GetCreate (RecursiveDescentCtx* ctx)
 static NodeBinTree* GetPrintf (RecursiveDescentCtx* ctx)
 {
     /**
-     * Print := '\gravo' ~var~
+     * Print := '\gravo' Expression
      */
     assert (ctx);
 
@@ -201,16 +372,13 @@ static NodeBinTree* GetPrintf (RecursiveDescentCtx* ctx)
 
     {
         /**
-         * ~var~
+         * Expression
          */
-        if (NodeDataVariable (ctx) == NodeBinTreeData::VARIABLE_POISON) return NotThisFunc (ctx, oldPos);
+        node->right = GetExpression (ctx);
+        if (node->right == nullptr) return NotThisFunc (ctx, oldPos);
 
-        node->right = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
-        if (!node) return NoMemoryError();
-        ctx->pos++;
+        return node;
     }
-
-    return node;
 }
           /// проверять по следующему токену - TO DO
 static NodeBinTree* GetAssign (RecursiveDescentCtx* ctx)
@@ -574,14 +742,30 @@ static NodeBinTree* GetPrimary (RecursiveDescentCtx* ctx)
 static NodeBinTree* GetNumber (RecursiveDescentCtx* ctx)
 {
     /**
-     * Number := ['0' - '9']+
+     * Number := ['0' - '9']+ | ~var~ | CallFunc
      */
     assert (ctx);
 
-    NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
-    ctx->pos++;
+    {
+        /**
+         * ['0' - '9']+ | ~var~
+         */
+        if (NodeDataType (ctx) == NodeBinTreeData::T_VALUE ||
+            NodeDataType (ctx) == NodeBinTreeData::T_VARIABLE)
+        {
+            NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
+            ctx->pos++;
 
-    return node;
+            return node;
+        }
+    }
+
+    {
+        /**
+         * CallFunc
+         */
+        return GetCallFunc (ctx);
+    }
 }
 
 #undef NODE_CTOR
@@ -617,8 +801,9 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
     NodeBinTreeData data = { .type     = NodeBinTreeData::TYPE_POISON,
                              .value    = NodeBinTreeData::VALUE_POISON,
                              .opCode   = NodeBinTreeData::OPCODE_POISON,
-                             .variable = NodeBinTreeData::VARIABLE_POISON };
-
+                             .variable = NodeBinTreeData::VARIABLE_POISON,
+                             .function = NodeBinTreeData::FUNCTION_POISON
+                             };
     {
         /**
          *  Parse keyword
@@ -627,6 +812,7 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
         {
             if (strncmp (ctx->str + ctx->pos, operation[i], lenOperation[i]) == 0)
             {
+//                printf ("\nopCode = %d\n\n", i);
                 data.type   = NodeBinTreeData::T_OPCODE;
                 data.opCode = i;
                 ctx->pos += lenOperation[i];
@@ -669,6 +855,22 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
 
     {
         /**
+         *  Parse function name
+         */
+        if (ctx->token->size >= 1 &&
+            (ctx->token->data[ctx->token->size - 1].opCode == BEGIN_FUNCTION ||
+             ctx->token->data[ctx->token->size - 1].opCode == BEGIN_PARAM_FUNC))
+        {
+            data.type     = NodeBinTreeData::T_FUNCTION;
+            data.function = FindFunction (ctx);
+
+            StackPush (ctx->token, data);
+            return;
+        }
+    }
+
+    {
+        /**
          *  Parse variable
          */
         data.type     = NodeBinTreeData::T_VARIABLE;
@@ -677,6 +879,7 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
         StackPush (ctx->token, data);
         return;
     }
+
 
     printf ("ERROR in LexicalAnalysisPass\n\n");
 
@@ -688,12 +891,33 @@ FindVariable (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
 
-    int nameLen = StrlenVarName (ctx->str + ctx->pos);
+    printf ("variable");
+    return FindName (ctx, ctx->var);
+}
 
-    int variable = 0;
-    for (; variable < ctx->var->size; variable++)
+static int
+FindFunction (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+
+    printf ("function");
+    return FindName (ctx, ctx->func);
+}
+
+/// функция поиска переменной или функции по имени
+static int
+FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
+{
+    assert (ctx);
+
+    printf ("\n\n\nFIND NAME token = %d\n\n", ctx->token->size);
+                       /// no var
+    int nameLen = StrlenName (ctx->str + ctx->pos);
+
+    int elem = 0;
+    for (; elem < stk->size; elem++)
     {
-        if (strncmp (ctx->var->data[variable].name, ctx->str + ctx->pos, nameLen) == 0)
+        if (strncmp (stk->data[elem].name, ctx->str + ctx->pos, nameLen) == 0)
         {
 //    printf ("\n\nНайдена переменная: \n"
 //            "\tlen = %d\n"
@@ -702,28 +926,28 @@ FindVariable (RecursiveDescentCtx* ctx)
 
             ctx->pos += nameLen;
 
-            return variable;
+            return elem;
         }
     }
 
-    Variable var = { .name = ctx->str + ctx->pos, .len = nameLen };
+    Variable data = { .name = ctx->str + ctx->pos, .len = nameLen };
 
 //    printf ("\n\nНайдена новая переменная: \n"
 //            "\tlen = %d\n"
 //            "\tname = ", nameLen);
-//    for (int i = 0; i < nameLen; i++) printf ("%c", ctx->str[ctx->pos]);
+//    for (int i = 0; i < nameLen; i++) printf ("%d ", ctx->str[ctx->pos + i]);
 
-    StackPush (ctx->var, var);
+    StackPush (stk, data);
 
     ctx->pos += nameLen;
 
-    return variable;
+    return elem;
 }
 
 /// так как после переменной может не быть пробела,
 /// нельзя испольновать sscanf
 static int
-StrlenVarName (const char* const buf)
+StrlenName (const char* const buf)
 {
     int i = 0;     // for
                    // isalpha
@@ -735,6 +959,7 @@ StrlenVarName (const char* const buf)
             case '(':
             case '{':
             case '}':
+            case ':':
             case '+':
             case '-':
             case '*':
@@ -744,6 +969,7 @@ StrlenVarName (const char* const buf)
             case '>':
             case '=':
             case ' ':
+            case '\r':
             case '\t':
             case '\n':
 
@@ -781,16 +1007,22 @@ SkipSpaces (RecursiveDescentCtx* ctx)
     while (isspace (ctx->str[ctx->pos])) ctx->pos++;
 }
     // in BinTreeStruct.cpp - ?
-//static int NodeDataType (RecursiveDescentCtx* ctx)
-//{
-//    assert (ctx);
-//    return ctx->token->data[ctx->pos].type;
-//}
+static int NodeDataType (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+    return ctx->token->data[ctx->pos].type;
+}
 
 static int NodeDataOpCode (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
     return ctx->token->data[ctx->pos].opCode;
+}
+
+static int NodeDataFunction (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+    return ctx->token->data[ctx->pos].function;
 }
 
 static int NodeDataVariable (RecursiveDescentCtx* ctx)

@@ -23,6 +23,7 @@ struct RecursiveDescentCtx
 {
     char* str;
     int pos;
+    Stack_Variable* func;
     Stack_Variable* var;
     Stack_NodeBinTreeData* token;
 };

@@ -52,6 +52,7 @@ NodeBinTreeDtor (NodeBinTree* node)
     node->data->value    = NodeBinTreeData::VALUE_POISON;
     node->data->opCode   = NodeBinTreeData::OPCODE_POISON;
     node->data->variable = NodeBinTreeData::VARIABLE_POISON;
+    node->data->function = NodeBinTreeData::FUNCTION_POISON;
     node->data   = nullptr;            // free data?
     node->left   = nullptr;
     node->right  = nullptr;
@@ -95,7 +96,7 @@ BinTreeDtor (BinTree* binTree)
 }
 
 NodeBinTreeData*
-NodeBinTreeDataCtor (int type, int value, int opCode, int variable)
+NodeBinTreeDataCtor (int type, int value, int opCode, int variable, int function)
 {
     NodeBinTreeData* data = (NodeBinTreeData*) calloc (1, sizeof (NodeBinTreeData));
     if (data == nullptr)
@@ -108,6 +109,7 @@ NodeBinTreeDataCtor (int type, int value, int opCode, int variable)
     data->value    = value;
     data->opCode   = opCode;
     data->variable = variable;
+    data->function = function;
 
     return data;
 }
@@ -166,18 +168,19 @@ static int
 SubtreePrintPostorderWithoutNil (NodeBinTree* node, FILE* fp)
 {
     if (fp == nullptr)   return ERROR_NOT_FILE_POINTER;
-    if (node == nullptr) return 0;
+    if (node == nullptr) return fprintf (fp, "_");;
 
     fprintf (fp, "(");
 
     SubtreePrintPostorderWithoutNil (node->left,  fp);
     SubtreePrintPostorderWithoutNil (node->right, fp);
 
-    fprintf (fp, "%d %d %d %d",
+    fprintf (fp, "%d %d %d %d %d",
                  node->data->type,
                  node->data->value,
                  node->data->opCode,
-                 node->data->variable);
+                 node->data->variable,
+                 node->data->function);
 
     fprintf (fp, ")");
 
@@ -257,6 +260,9 @@ ReadDataNodeBinTree (char* const buf, int* len)
     sscanf (buf + *len, "%d%n", &data->variable, &nLen);
     *len += nLen;
 
+    sscanf (buf + *len, "%d%n", &data->function, &nLen);
+    *len += nLen;
+
     return data;
 }
 
@@ -274,5 +280,12 @@ ReadBranchNodeBinTreeWithoutNil (char* const buf, int* len)
         return NodeBinTreeCtorPostorderWithoutNil (buf, len);
     }
 
+    if (buf[(*len)] == '_')
+    {
+        (*len)++;
+        return nullptr;
+    }
+
+    printf ("ERROR IN ReadBranchNodeBinTreeWithoutNil\n\n");
     return nullptr;
 }

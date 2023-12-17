@@ -1,13 +1,53 @@
 #include "back-end.h"
 
-static int CompileOperation   (BackEndCtx* ctx);
-static int CompilePrintf      (BackEndCtx* ctx);
-static int CompileAssign      (BackEndCtx* ctx);
-static int CompileConditionOp (BackEndCtx* ctx);
-static int CompileCreate      (BackEndCtx* ctx);
-static int CompileEval        (BackEndCtx* ctx);
+static int CompileMultipleOperations (BackEndCtx* ctx);
+static int CompileOperation          (BackEndCtx* ctx);
+static int CompileFunction           (BackEndCtx* ctx);
+static int CompileFuncReturn         (BackEndCtx* ctx);
+static int CompilePrintf             (BackEndCtx* ctx);
+static int CompileAssign             (BackEndCtx* ctx);
+static int CompileConditionOp        (BackEndCtx* ctx);
+static int CompileCreate             (BackEndCtx* ctx);
+static int CompileExpression         (BackEndCtx* ctx);
                            // сюда тоже IsOpCode и тп
-int CompileMultipleOperations (BackEndCtx* ctx)
+
+int CompileProgram (BackEndCtx* ctx)
+{
+    assert (ctx);
+
+    NodeBinTree* oldNode = ctx->node;
+
+    /**
+     *  Compile main
+     */
+    fprintf (ctx->fp, "\n:main");
+
+    ctx->node = oldNode->left;
+    CompileMultipleOperations (ctx);
+
+    oldNode = oldNode->right;
+
+    fprintf (ctx->fp, "\n\n\t\thlt");
+
+    /**
+     *  Compile functions
+     */
+    while (oldNode != nullptr)
+    {
+        fprintf (ctx->fp, "\n\n:func_%d_", oldNode->data->function);
+
+        ctx->node = oldNode->left;
+        CompileMultipleOperations (ctx);
+
+        fprintf (ctx->fp, "\n\n\t\tret");
+
+        oldNode = oldNode->right;
+    }
+
+    return 0;
+}
+
+static int CompileMultipleOperations (BackEndCtx* ctx)
 {
     assert (ctx);
 
@@ -35,7 +75,9 @@ static int CompileOperation (BackEndCtx* ctx)
     assert (ctx);
 //    printf ("\n\nI in CompileOperation\n");
 
-    if (CompilePrintf      (ctx) &&
+    if (CompileFunction    (ctx) &&
+        CompileFuncReturn  (ctx) &&
+        CompilePrintf      (ctx) &&
         CompileConditionOp (ctx) &&
         CompileAssign      (ctx) &&
         CompileCreate      (ctx))
@@ -46,15 +88,52 @@ static int CompileOperation (BackEndCtx* ctx)
         printf ("\n\ttype     = %d\
                  \n\tvalue    = %d\
                  \n\topCode   = %d\
-                 \n\tvariable = %d",
+                 \n\tvariable = %d\
+                 \n\tfunction = %d",
                  ctx->node->data->type,
                  ctx->node->data->value,
                  ctx->node->data->opCode,
-                 ctx->node->data->variable);
+                 ctx->node->data->variable,
+                 ctx->node->data->function);
         return ERROR_IN_CompileOperation;
     }
 
 //    printf ("I end CompileOperation\n\n\n");
+
+    return 0;
+}
+
+static int CompileFunction (BackEndCtx* ctx)
+{
+    assert (ctx);
+
+    if (ctx->node->data->type != NodeBinTreeData::T_FUNCTION)
+        return ERROR_IN_CompileFunction;
+
+    fprintf (ctx->fp, "\n\n\t\tcall :func_%d_\n", ctx->node->data->function);
+
+    return 0;
+}
+
+static int CompileFuncReturn (BackEndCtx* ctx)
+{
+    assert (ctx);
+//    printf ("I in CompileFuncReturn\n");
+
+    if (ctx->node->data->opCode != FUNC_RETURN)
+        return ERROR_IN_CompileFuncReturn;
+
+    if (ctx->node->right != nullptr)
+    {
+        fprintf (ctx->fp, "\n");
+
+        ctx->node = ctx->node->right;
+        CompileExpression (ctx);
+
+        fprintf (ctx->fp, "\n\t\tpop rax");
+    }
+
+    fprintf (ctx->fp, "\n\n\t\tret");
 
     return 0;
 }
@@ -64,12 +143,14 @@ static int CompilePrintf (BackEndCtx* ctx)
     assert (ctx);
 //    printf ("I in CompilePrintf\n");
 
-    if (ctx->node->      data->opCode   != PRINTF ||
-        ctx->node->left->data->variable == NodeBinTreeData::VARIABLE_POISON)
+    if (ctx->node->data->opCode != PRINTF)
         return ERROR_IN_CompilePrintf;
 
-    fprintf (ctx->fp, "\n\t\tpush [%d]"
-                  "\n\t\tOUT", ctx->node->left->data->variable);
+    ctx->node = ctx->node->right;
+
+    if (CompileExpression (ctx)) return ERROR_IN_CompilePrintf;
+
+    fprintf (ctx->fp, "\n\t\tOUT");
 
     return 0;
 }
@@ -90,10 +171,10 @@ static int CompileConditionOp (BackEndCtx* ctx)
     NodeBinTree* oldNode = ctx->node;
 
     ctx->node = oldNode->left->left;
-    CompileEval (ctx);
+    CompileExpression (ctx);
 
     ctx->node = oldNode->left->right;
-    CompileEval (ctx);
+    CompileExpression (ctx);
 
     switch (oldNode->left->data->opCode)
     {
@@ -199,7 +280,7 @@ static int CompileAssign (BackEndCtx* ctx)
     NodeBinTree* oldNode = ctx->node;
 
     ctx->node = oldNode->right;
-    CompileEval (ctx);
+    CompileExpression (ctx);
 
     fprintf (ctx->fp, "\n\t\tpop [%d]\n", oldNode->left->data->variable);
 
@@ -219,15 +300,15 @@ static int CompileCreate (BackEndCtx* ctx)
     return 0;
 }
 
-static int CompileEval (BackEndCtx* ctx)
+static int CompileExpression (BackEndCtx* ctx)
 {
     NodeBinTree* oldNode = ctx->node;
 
     ctx->node = oldNode->left;
-    if (ctx->node != nullptr) CompileEval (ctx);
+    if (ctx->node != nullptr) CompileExpression (ctx);
 
     ctx->node = oldNode->right;
-    if (ctx->node != nullptr) CompileEval (ctx);
+    if (ctx->node != nullptr) CompileExpression (ctx);
 
     ctx->node = oldNode;
 
@@ -242,6 +323,13 @@ static int CompileEval (BackEndCtx* ctx)
         case NodeBinTreeData::T_VARIABLE:
 
             fprintf (ctx->fp, "\n\t\tpush [%d]", ctx->node->data->variable);
+
+            break;
+
+        case NodeBinTreeData::T_FUNCTION:
+
+            CompileFunction (ctx);
+            fprintf (ctx->fp, "\n\t\tpush rax");
 
             break;
 
@@ -327,14 +415,14 @@ static int CompileEval (BackEndCtx* ctx)
         //
         //            break;
                 default:
-                    printf ("ERROR in CompileEval\n"
+                    printf ("ERROR in CompileExpression\n"
                             "opCode = %d\n", ctx->node->data->opCode);
             }
 
             break;
 
         default:
-            printf ("ERROR in CompileEval\n"
+            printf ("ERROR in CompileExpression\n"
                     "type = %d\n", ctx->node->data->type);
     }
 

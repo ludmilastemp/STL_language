@@ -7,10 +7,12 @@ enum ErrorInFunction
 {
     ERROR_IN_CompileMultipleOperations  = 1,
     ERROR_IN_CompileOperation           = 2,
-    ERROR_IN_CompilePrintf              = 3,
-    ERROR_IN_CompileAssign              = 4,
-    ERROR_IN_CompileIf                  = 5,
-    ERROR_IN_CompileCreate              = 6,
+    ERROR_IN_CompileFunction            = 3,
+    ERROR_IN_CompileFuncReturn          = 4,
+    ERROR_IN_CompilePrintf              = 5,
+    ERROR_IN_CompileAssign              = 6,
+    ERROR_IN_CompileIf                  = 7,
+    ERROR_IN_CompileCreate              = 8,
 };
 
 struct BackEndCtx
@@ -21,6 +23,6 @@ struct BackEndCtx
     int nWhile;
 };
 
-int CompileMultipleOperations (BackEndCtx* ctx);
+int CompileProgram (BackEndCtx* ctx);
 
 #endif /* STL_back_end_ */

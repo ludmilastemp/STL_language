@@ -33,7 +33,7 @@ int main (const int argc, const char** argv)
                        .nIf = 1,
                        .nWhile = 1 };
 
-    CompileMultipleOperations (&ctx);
+    CompileProgram (&ctx);
 
     fclose (fp);
 

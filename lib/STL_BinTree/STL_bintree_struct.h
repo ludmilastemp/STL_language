@@ -15,80 +15,93 @@
 #define BIN_TREE_DATA_VALUE_PRINT_SPECIFIER    "%d"
 #define BIN_TREE_DATA_OPCODE_PRINT_SPECIFIER   "%d"
 #define BIN_TREE_DATA_VARIABLE_PRINT_SPECIFIER "%s"
-
-const int         nOperation      = 28;
+                /// no operation -> key words
+const int         nOperation      = 35;
 const char* const operation []    = {":)",          // 0
-                                     "\\katarce",   // 1
-                                     "\\katapanma", // 2
-                                     "\\gravo",     // 3
-                                     "<=>",         // 4
-                                     "<?=?>",       // 5
-                                     "\\Z",         // 6
-                                     "\\ni",        // 7
-                                     "::=",         // 8
-                                     "+",           // 9
-                                     "-",           // 10
-                                     "*",           // 11
-                                     "/",           // 12
-                                     "^",           // 13
-                                     "(",           // 14
-                                     ")",           // 15
-                                     "sin",         // 16
-                                     "cos",         // 17
-                                     "ln",          // 18
-                                     "sqrt",        // 19
-                                     ">=",          // 20  // не выводится в графизе
-                                     "<=",          // 21
-                                     ">",           // 22
-                                     "<",           // 23
-                                     "==",          // 24
-                                     "!=",          // 25
-                                     "=^.",         // 26
-                                     ".^=",         // 27
-                                     "lemma",       //
-                                     "",            //
+                                     "=^.",         // 1
+                                     ".^=",         // 2
+                                     "\\teornma",   // 3
+                                     "\\lemma",     // 4
+                                     "\\oed",       // 5
+                                     ":(",          // 6
+                                     "):",          // 7
+                                     "(:",          // 8
+                                     "\\katarce",   // 9
+                                     "\\katapanma", // 10
+                                     "\\gravo",     // 11
+                                     "<=>",         // 12
+                                     "<?=?>",       // 13
+                                     "\\Z",         // 14
+                                     "\\ni",        // 15
+                                     "::=",         // 16
+                                     "+",           // 17
+                                     "-",           // 18
+                                     "*",           // 19
+                                     "/",           // 20
+                                     "^",           // 21
+                                     "(",           // 22
+                                     ")",           // 23
+                                     "sin",         // 24
+                                     "cos",         // 25
+                                     "ln",          // 26
+                                     "sqrt",        // 27
+                                     ">=",          // 28  // не выводится в графизе
+                                     "<=",          // 29
+                                     ">",           // 30
+                                     "<",           // 31
+                                     "==",          // 32
+                                     "!=",          // 33
+                                     "\\VCEGO_XOROSHEGO", // 34
                                      };
 
-const int         lenOperation [] = {2, 8, 10, 6, 3, 5,
-                                     2, 3, 3, 1, 1,
-                                     1, 1, 1, 1, 1,
-                                     3, 3, 2, 4, 2,
-                                     2, 1, 1, 2, 2,
-                                     3, 3, 5
+const int         lenOperation [] = {2,  3, 3, 8, 6,
+                                     4,  2, 2, 2, 8,
+                                     10, 6, 3, 5,
+                                     2,  3, 3, 1, 1,
+                                     1,  1, 1, 1, 1,
+                                     3,  3, 2, 4, 2,
+                                     2,  1, 1, 2, 2,
+                                     16
                                     };
 
 
 enum OPCODE
 {
-    END_STR             = 0,
-    BEGIN_INSIDE        = 1,
-    END_INSIDE          = 2,
-    PRINTF              = 3,
-    IF                  = 4,
-    WHILE               = 5,
-    T_INT               = 6,
-    SYMBOL_NI           = 7,
-    ASSING              = 8,
-    ADD                 = 9,
-    SUB                 = 10,
-    MUL                 = 11,
-    DIV                 = 12,
-    POW                 = 13,
-    OPEN_PARENTHESIS    = 14,
-    CLOSE_PARENTHESIS   = 15,
-    SIN                 = 16,
-    COS                 = 17,
-    LN                  = 18,
-    SQRT                = 19,
-    ABOVE_EQUAL         = 20,
-    BELOW_EQUAL         = 21,
-    ABOVE               = 22,
-    BELOW               = 23,
-    EQUAL               = 24,
-    NO_EQUAL            = 25,
-    BEGIN_COMMENT       = 26,
-    END_COMMENT         = 27,
-    BEGIN_FUNCTION      = 28,
+    END_STR             = 0,   // end operation
+    BEGIN_COMMENT       = 1,
+    END_COMMENT         = 2,
+    MAIN                = 3,
+    BEGIN_FUNCTION      = 4,
+    END_FUNCTION        = 5,
+    BEGIN_PARAM_FUNC    = 6,
+    END_PARAM_FUNC      = 7,
+    FUNC_RETURN         = 8,
+    BEGIN_INSIDE        = 9,
+    END_INSIDE          = 10,
+    PRINTF              = 11,
+    IF                  = 12,
+    WHILE               = 13,
+    T_INT               = 14,
+    SYMBOL_NI           = 15,
+    ASSING              = 16,
+    ADD                 = 17,
+    SUB                 = 18,
+    MUL                 = 19,
+    DIV                 = 20,
+    POW                 = 21,
+    OPEN_PARENTHESIS    = 22,
+    CLOSE_PARENTHESIS   = 23,
+    SIN                 = 24,
+    COS                 = 25,
+    LN                  = 26,
+    SQRT                = 27,
+    ABOVE_EQUAL         = 28,
+    BELOW_EQUAL         = 29,
+    ABOVE               = 30,
+    BELOW               = 31,
+    EQUAL               = 32,
+    NO_EQUAL            = 33,
+    VCEGO_XOROSHEGO     = 34,
 
 };
 
@@ -139,7 +152,8 @@ NodeBinTreeData*
 NodeBinTreeDataCtor (int type     = NodeBinTreeData::TYPE_POISON,
                      int value    = NodeBinTreeData::VALUE_POISON,
                      int opCode   = NodeBinTreeData::OPCODE_POISON,
-                     int variable = NodeBinTreeData::VARIABLE_POISON);
+                     int variable = NodeBinTreeData::VARIABLE_POISON,
+                     int function = NodeBinTreeData::FUNCTION_POISON);
 
 //NodeBinTree*
 //BinTreeCopy (NodeBinTree* node);
