@@ -1,12 +1,12 @@
 #include "back-end.h"
 
-static int CompileOperation (BackEndCtx* ctx);
-static int CompilePrintf    (BackEndCtx* ctx);
-static int CompileAssign    (BackEndCtx* ctx);
-static int CompileIf        (BackEndCtx* ctx);
-static int CompileCreate    (BackEndCtx* ctx);
-static int CompileEval      (BackEndCtx* ctx);
-
+static int CompileOperation   (BackEndCtx* ctx);
+static int CompilePrintf      (BackEndCtx* ctx);
+static int CompileAssign      (BackEndCtx* ctx);
+static int CompileConditionOp (BackEndCtx* ctx);
+static int CompileCreate      (BackEndCtx* ctx);
+static int CompileEval        (BackEndCtx* ctx);
+                           // сюда тоже IsOpCode и тп
 int CompileMultipleOperations (BackEndCtx* ctx)
 {
     assert (ctx);
@@ -35,10 +35,10 @@ static int CompileOperation (BackEndCtx* ctx)
     assert (ctx);
 //    printf ("\n\nI in CompileOperation\n");
 
-    if (CompilePrintf (ctx) &&
-        CompileIf     (ctx) &&
-        CompileAssign (ctx) &&
-        CompileCreate (ctx))
+    if (CompilePrintf      (ctx) &&
+        CompileConditionOp (ctx) &&
+        CompileAssign      (ctx) &&
+        CompileCreate      (ctx))
     {
 
         printf ("\nERROR in CompileOperation!!!\n\n");
@@ -74,12 +74,18 @@ static int CompilePrintf (BackEndCtx* ctx)
     return 0;
 }
 
-static int CompileIf (BackEndCtx* ctx)
+static int CompileConditionOp (BackEndCtx* ctx)
 {
     assert (ctx);
-//    printf ("I in CompileIf\n");
+//    printf ("I in CompileConditionOp\n");
 
-    if (ctx->node->data->opCode != IF) return ERROR_IN_CompileIf;
+    if (     ctx->node->data->opCode == IF)
+        fprintf (ctx->fp, "\n\n:if_%d_condition", ctx->nIf);
+
+    else if (ctx->node->data->opCode == WHILE)
+        fprintf (ctx->fp, "\n\n:while_%d_condition", ctx->nWhile);
+
+    else return ERROR_IN_CompileIf;
 
     NodeBinTree* oldNode = ctx->node;
 
@@ -132,26 +138,49 @@ static int CompileIf (BackEndCtx* ctx)
             return ERROR_IN_CompileIf;
     }
 
-                  /// const
-    fprintf (ctx->fp, " :if_1"
-                 "\n\t\tjmp :else_1");
 
-    fprintf (ctx->fp, "\n\n:if_1");
+    if (oldNode->data->opCode == IF)
+    {
+        fprintf (ctx->fp, " :if_%d_body"
+                     "\n\t\tjmp :else_%d_body", ctx->nIf, ctx->nIf);
 
+        fprintf (ctx->fp, "\n\n:if_%d_body", ctx->nIf);
+    }
+
+    else
+    {
+        fprintf (ctx->fp, " :while_%d_body"
+                     "\n\t\tjmp :while_%d_end", ctx->nWhile, ctx->nWhile);
+
+        fprintf (ctx->fp, "\n\n:while_%d_body", ctx->nWhile);
+    }
 
     ctx->node = oldNode->right->left;
     CompileMultipleOperations (ctx);
 
-    fprintf (ctx->fp, "\n\t\tjmp :end_if_1");
-
-    fprintf (ctx->fp, "\n\n:else_1");
-    if (oldNode->right->right != nullptr)
+    if (oldNode->data->opCode == IF)
     {
-        ctx->node = oldNode->right->right;
-        CompileMultipleOperations (ctx);
+        fprintf (ctx->fp, "\n\t\tjmp :if_%d_end", ctx->nIf);
+
+        fprintf (ctx->fp, "\n\n:else_%d_body", ctx->nIf);
+        if (oldNode->right->right != nullptr)
+        {
+            ctx->node = oldNode->right->right;
+            CompileMultipleOperations (ctx);
+        }
+        fprintf (ctx->fp, "\n\t\tjmp :if_%d_end", ctx->nIf);
+
+        fprintf (ctx->fp, "\n\n:if_%d_end\n\n", ctx->nIf);
+        ctx->nIf++;
     }
 
-    fprintf (ctx->fp, "\n\n:end_if_1");
+    else
+    {
+        fprintf (ctx->fp, "\n\t\tjmp :while_%d_condition", ctx->nWhile);
+
+        fprintf (ctx->fp, "\n\n:while_%d_end\n\n", ctx->nWhile);
+        ctx->nWhile++;
+    }
 
     ctx->node = oldNode;
 

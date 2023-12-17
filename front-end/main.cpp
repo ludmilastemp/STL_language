@@ -51,7 +51,7 @@ int main (const int argc, const char** argv)
                  token.data[i].variable);
     }
 
-    tree->root = GetMultipleOperations (&ctx);
+    tree->root = ParseProgram (&ctx);
 
     STL_GraphvizBinTree (tree, after_front_end);
     BinTreePrintPostorderWithoutNil (tree, argv2);

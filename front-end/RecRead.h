@@ -29,6 +29,6 @@ struct RecursiveDescentCtx
 
 void LexicalAnalysis (RecursiveDescentCtx* ctx);
 
-NodeBinTree* GetMultipleOperations (RecursiveDescentCtx* ctx);
+NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx);
 
 #endif /* STL_RecRead_ */

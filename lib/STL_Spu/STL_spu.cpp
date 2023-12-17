@@ -94,7 +94,7 @@ static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
     command = str[(*ip)++];
 
 //    printf ("ip = %d\n", *ip - 1);
-//    printf ("command = 0x%x\n", command);
+//    printf ("command = 0x%x\n\n", command);
 
 //    printf ("rax = %d\n", spu->registers[1] / 100);
 //    printf ("rbx = %d\n", spu->registers[2] / 100);

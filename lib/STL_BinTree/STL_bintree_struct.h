@@ -16,70 +16,80 @@
 #define BIN_TREE_DATA_OPCODE_PRINT_SPECIFIER   "%d"
 #define BIN_TREE_DATA_VARIABLE_PRINT_SPECIFIER "%s"
 
-const int         nOperation      = 25;
-const char* const operation []    = {"\\Z",         // 0
-                                     "\\ni",        // 1
-                                     "\\gravo",     // 2
-                                     "::=",         // 3
-                                     ":)",          // 4
-                                     "+",           // 5
-                                     "-",           // 6
-                                     "*",           // 7
-                                     "/",           // 8
-                                     "^",           // 9
-                                     "(",           // 10
-                                     ")",           // 11
-                                     "sin",         // 12
-                                     "cos",         // 13
-                                     "ln",          // 14
-                                     "sqrt",        // 15
-                                     "<=>",         // 16
-                                     "\\katarce",   // 17
-                                     "\\katapanma", // 18
-                                     ">=",          // 19  // не выводится в графизе
-                                     "<=",          // 20
-                                     ">",           // 21
-                                     "<",           // 22
-                                     "==",          // 23
-                                     "!=",          // 24
-                                     "",            //
+const int         nOperation      = 28;
+const char* const operation []    = {":)",          // 0
+                                     "\\katarce",   // 1
+                                     "\\katapanma", // 2
+                                     "\\gravo",     // 3
+                                     "<=>",         // 4
+                                     "<?=?>",       // 5
+                                     "\\Z",         // 6
+                                     "\\ni",        // 7
+                                     "::=",         // 8
+                                     "+",           // 9
+                                     "-",           // 10
+                                     "*",           // 11
+                                     "/",           // 12
+                                     "^",           // 13
+                                     "(",           // 14
+                                     ")",           // 15
+                                     "sin",         // 16
+                                     "cos",         // 17
+                                     "ln",          // 18
+                                     "sqrt",        // 19
+                                     ">=",          // 20  // не выводится в графизе
+                                     "<=",          // 21
+                                     ">",           // 22
+                                     "<",           // 23
+                                     "==",          // 24
+                                     "!=",          // 25
+                                     "=^.",         // 26
+                                     ".^=",         // 27
+                                     "lemma",       //
                                      "",            //
                                      };
 
-const int         lenOperation [] = {2, 3, 6, 3, 2,
+const int         lenOperation [] = {2, 8, 10, 6, 3, 5,
+                                     2, 3, 3, 1, 1,
                                      1, 1, 1, 1, 1,
-                                     1, 1, 3, 3, 2,
-                                     4, 3, 8, 10, 2,
+                                     3, 3, 2, 4, 2,
                                      2, 1, 1, 2, 2,
+                                     3, 3, 5
                                     };
+
 
 enum OPCODE
 {
-    T_INT               = 0,
-    SYMBOL_NI           = 1,
-    PRINTF              = 2,
-    ASSING              = 3,
-    END_STR             = 4,
-    ADD                 = 5,
-    SUB                 = 6,
-    MUL                 = 7,
-    DIV                 = 8,
-    POW                 = 9,
-    OPEN_PARENTHESIS    = 10,
-    CLOSE_PARENTHESIS   = 11,
-    SIN                 = 12,
-    COS                 = 13,
-    LN                  = 14,
-    SQRT                = 15,
-    IF                  = 16,
-    BEGIN_INSIDE        = 17,
-    END_INSIDE          = 18,
-    ABOVE_EQUAL         = 19,
-    BELOW_EQUAL         = 20,
-    ABOVE               = 21,
-    BELOW               = 22,
-    EQUAL               = 23,
-    NO_EQUAL            = 24,
+    END_STR             = 0,
+    BEGIN_INSIDE        = 1,
+    END_INSIDE          = 2,
+    PRINTF              = 3,
+    IF                  = 4,
+    WHILE               = 5,
+    T_INT               = 6,
+    SYMBOL_NI           = 7,
+    ASSING              = 8,
+    ADD                 = 9,
+    SUB                 = 10,
+    MUL                 = 11,
+    DIV                 = 12,
+    POW                 = 13,
+    OPEN_PARENTHESIS    = 14,
+    CLOSE_PARENTHESIS   = 15,
+    SIN                 = 16,
+    COS                 = 17,
+    LN                  = 18,
+    SQRT                = 19,
+    ABOVE_EQUAL         = 20,
+    BELOW_EQUAL         = 21,
+    ABOVE               = 22,
+    BELOW               = 23,
+    EQUAL               = 24,
+    NO_EQUAL            = 25,
+    BEGIN_COMMENT       = 26,
+    END_COMMENT         = 27,
+    BEGIN_FUNCTION      = 28,
+
 };
 
 struct NodeBinTree
