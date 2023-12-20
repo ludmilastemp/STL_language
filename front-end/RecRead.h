@@ -22,7 +22,9 @@ const int  IHavePawsPeriod = 150;
 struct RecursiveDescentCtx
 {
     char* str;
-    int pos;
+    int   pos;
+    int   nFunc;
+    int   nVarInMain;
     Stack_Variable* func;
     Stack_Variable* var;
     Stack_NodeBinTreeData* token;

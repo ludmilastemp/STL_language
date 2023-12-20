@@ -12,6 +12,9 @@ int SetLabel (const char* string, const int ip, Stack_Label* labels)
     assert (ip >= 0);
     assert (labels);
 
+//printf ("\n\nI IN SetLabel\n");
+//printf ("ip = %d\n", ip);
+
     int nLabel = FindLabel (labels, string);
 
     CreateLabel (labels, nLabel, string, ip);
@@ -26,6 +29,9 @@ int SetLabelArg (const char* string, char* str, int* ip, Stack_Label* labels, St
     assert (ip);
     assert (labels);
     assert (fixups);
+
+//printf ("\n\nI IN SetLabelArg\n");
+//printf ("ip = %d\n", *ip);
 
     int nLabel = FindLabel (labels, string);
 
@@ -107,6 +113,8 @@ static int CreateLabel (Stack_Label* labels, const int nLabel, const char* name,
 
     Label newLabel = { name, StrlenUpToSpace (name), byte };
 
+//printf ("\n!!!!!!\tstrlen = %d\n\n", StrlenUpToSpace (name));
+
     if (nLabel == labels->size)
     {
         StackPush (labels, newLabel);
@@ -126,6 +134,8 @@ static int FindLabel (Stack_Label* labels, const char* string)
 
     int i = 0;
 
+//printf ("I IN FindLabel\n");
+
     for (; i <= labels->size - 1; ++i)
     {
         if (strncmp (string, labels->data[i].name, labels->data[i].lenName) == 0)
@@ -133,6 +143,12 @@ static int FindLabel (Stack_Label* labels, const char* string)
             break;
         }
     }
+
+//printf ("           i = %d\n", (int)labels->size);
+//printf ("labels->size = %d\n", (int)labels->size);
+//printf ("labels->data[i].lenName = %d\n", labels->data[i].lenName);
+//for (int j = 0; j < labels->data[i].lenName; ++j)
+//    printf ("labels->data[i].name = %c\n", labels->data[i].name[j]);
 
     return i;
 }
@@ -142,8 +158,12 @@ static int StrlenUpToSpace (const char* const string)
     assert (string);
 
     int i = 0;
-    while (string[i] != ' ' && string[i] != '\n' && string[i] != '\0') i++;
+    while (string[i] != ' ' &&
+           string[i] != '\r' &&
+           string[i] != '\t' &&
+           string[i] != '\n' &&
+           string[i] != '\0') i++;
 
-    return i - 1;
+    return i;
 }
 

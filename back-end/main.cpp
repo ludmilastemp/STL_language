@@ -35,6 +35,11 @@ int main (const int argc, const char** argv)
 
     CompileProgram (&ctx);
 
+    /**
+     *  Bug in asm
+     */
+    fprintf (fp, "\n\n:aaa");
+
     fclose (fp);
 
     printf ("\n\nОК!!!\n\n");

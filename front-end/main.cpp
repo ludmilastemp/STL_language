@@ -4,7 +4,7 @@
 #include "../lib/STL_Graphviz/STL_graphviz.h"
 
 int main (const int argc, const char** argv)
-{
+{                 //          EEEEEEEELLLLLSSSSSEEEEEEE
     const char* argv1 = 0;
     const char* argv2 = 0;
 
@@ -19,6 +19,7 @@ int main (const int argc, const char** argv)
 
     BinTree* tree = BinTreeCtor ();
     if (tree == nullptr) return 0;
+    printf ("Read OK\n");
 
     tree->buf = file.text;
 
@@ -33,6 +34,8 @@ int main (const int argc, const char** argv)
 
     RecursiveDescentCtx ctx = {.str   = tree->buf,
                                .pos   = 0,
+                               .nFunc = 0,
+                               .nVarInMain = 0,
                                .func  = &func,
                                .var   = &var,
                                .token = &token};
@@ -70,3 +73,42 @@ int main (const int argc, const char** argv)
 
     return 0;
 }
+
+//#include <stdio.h>
+//
+//int* p = 0;
+//
+//int Func (int n)
+//{
+//    int k = 0;
+//
+//    printf ("k = [%p]\n", &k);
+//
+//    if (n > 1)
+//    {
+//        k = Func (n - 1);
+//    }
+//    else k = 1;
+//
+//    printf ("k = [%p]\n", &k);
+//    printf ("k = %d\n", k);
+//    printf ("p = [%p]\n", p);
+//    printf ("p = %d\n\n", *p);
+//    printf ("\n");
+//    p = &k;
+//
+//    return k;
+//
+//}
+//
+//
+//int main ()
+//{
+//    int n = 4;
+//
+//    p = &n;
+//
+//    Func (n);
+//
+//    return 0;
+//}
