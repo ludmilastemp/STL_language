@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "back-end.h"
-#include "../lib/STL_Graphviz/STL_graphviz.h"
 
 int main (const int argc, const char** argv)
 {
@@ -11,7 +10,7 @@ int main (const int argc, const char** argv)
     if (argc <= 1) argv1 = "examples/1tree.cpp";
     else argv1 = argv[1];
 
-    if (argc <= 2) argv2 = "examples/1asm.cpp";
+    if (argc <= 2) argv2 = "examples/1front_-1.cpp";
     else argv2 = argv[2];
 
     File file = { .name = argv1 };
@@ -25,8 +24,6 @@ int main (const int argc, const char** argv)
         printf ("TREE NULLPTR!!!\n\n");
         return 0;
     }
-
-    STL_GraphvizBinTree (tree, after_back_end);
 
     FILE* fp = fopen (argv2, "w");
     assert (fp);

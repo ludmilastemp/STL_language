@@ -1,7 +1,4 @@
-#include "RecRead.h"
-
-/// TO DO: встретилось это, а ожидалось это
-/// начать чекать тип
+#include "Formatting.h"
 
 /**
  * Function     := '\oed' MultipleOperations '\lemma' ~nameFunc~
@@ -242,7 +239,7 @@ static NodeBinTree* GetOperation (RecursiveDescentCtx* ctx)
         /**
          * ':)'
          */
-        if (NodeDataOpCode (ctx) != END_OPERATION)
+        if (NodeDataOpCode (ctx) != END_STR)
         {
             printf ("ERROR in GetOperation!!!\n\n");
             printf ("\t\tpos = %d\n\n", ctx->pos);
@@ -307,7 +304,7 @@ static NodeBinTree* GetCallFunc (RecursiveDescentCtx* ctx)
             /**
              * '>|<'  ->  ':)'
              */
-            node1->right->data->opCode = END_OPERATION;
+            node1->right->data->opCode = END_STR;
 
             /**
              * Expression
@@ -353,7 +350,7 @@ static NodeBinTree* GetFuncReturn (RecursiveDescentCtx* ctx)
         /**
          * Expression
          */
-        if (NodeDataType (ctx) != END_OPERATION)
+        if (NodeDataType (ctx) != END_STR)
         {
             node->right = GetExpression (ctx);
         }
@@ -819,19 +816,6 @@ static NodeBinTree* GetNumber (RecursiveDescentCtx* ctx)
 
     {
         /**
-         *  '\pat'
-         */
-        if (NodeDataOpCode (ctx) == PAT_IN)
-        {
-            NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
-            ctx->pos++;
-
-            return node;
-        }
-    }
-
-    {
-        /**
          * CallFunc
          */
         return GetCallFunc (ctx);
@@ -847,19 +831,9 @@ LexicalAnalysis (RecursiveDescentCtx* ctx)
 
     SkipSpaces (ctx);
 
-    int oldPos = 0;
-
     while (ctx->str[ctx->pos])
     {
-        oldPos = ctx->pos;
-
         LexicalAnalysisPass (ctx);
-
-        if (ctx->pos == oldPos)
-        {
-            printf ("Лексер закончил в if\n\n");
-            return;
-        }
 
         SkipSpaces (ctx);
     }
@@ -875,7 +849,7 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
 //            "\n\tsize = %d", ctx->token->size);
 //    printf ("\n\tpos  = %d", ctx->pos);
 //    printf ("\n\tstr  = %d", ctx->str[ctx->pos]);
-//
+
 //    if (ctx->token->size >= 60) assert (false);
 
     NodeBinTreeData data = { .type     = NodeBinTreeData::TYPE_POISON,
@@ -888,13 +862,14 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
         /**
          *  Parse keyword
          */
-        for (int i = 0; i < nkeyWords; i++)
+        for (int i = 0; i < nOperation; i++)
         {
-            if (strncmp (ctx->str + ctx->pos, keyWords[i], lenKeyWords[i]) == 0)
+            if (strncmp (ctx->str + ctx->pos, operation[i], lenOperation[i]) == 0)
             {
+//                printf ("\nopCode = %d %s\n\n", i, operation[i]);
                 data.type   = NodeBinTreeData::T_OPCODE;
                 data.opCode = i;
-                ctx->pos += lenKeyWords[i];
+                ctx->pos += lenOperation[i];
 
                 /**
                  *  Parse comment
@@ -902,10 +877,10 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
                 if (i == BEGIN_COMMENT)
                 {
                     while (strncmp (ctx->str + ctx->pos,
-                                    keyWords[END_COMMENT],
-                                    lenKeyWords[END_COMMENT]) != 0)
+                                    operation[END_COMMENT],
+                                    lenOperation[END_COMMENT]) != 0)
                         ctx->pos++;
-                    ctx->pos += lenKeyWords[END_COMMENT];
+                    ctx->pos += lenOperation[END_COMMENT];
 
                     return;
                 }
@@ -970,6 +945,7 @@ FindVariable (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
 
+//    printf ("variable");
     return FindName (ctx, ctx->var);
 }
 
@@ -978,6 +954,7 @@ FindFunction (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
 
+//    printf ("function");
     return FindName (ctx, ctx->func);
 }
 
@@ -986,6 +963,8 @@ static int
 FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
 {
     assert (ctx);
+
+//    printf ("\n\n\nFIND NAME token = %d\n\n", ctx->token->size);
                        /// no var
     int nameLen = StrlenName (ctx->str + ctx->pos);
 
@@ -994,6 +973,11 @@ FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
     {
         if (strncmp (stk->data[elem].name, ctx->str + ctx->pos, nameLen) == 0)
         {
+//    printf ("\n\nНайдена переменная: \n"
+//            "\tlen = %d\n"
+//            "\tname = ", nameLen);
+//    for (int i = 0; i < nameLen; i++) printf ("%c", ctx->str[ctx->pos]);
+
             ctx->pos += nameLen;
 
             return elem;
@@ -1001,6 +985,11 @@ FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
     }
 
     Variable data = { .name = ctx->str + ctx->pos, .len = nameLen };
+
+//    printf ("\n\nНайдена новая переменная: \n"
+//            "\tlen = %d\n"
+//            "\tname = ", nameLen);
+//    for (int i = 0; i < nameLen; i++) printf ("%d ", ctx->str[ctx->pos + i]);
 
     StackPush (stk, data);
 

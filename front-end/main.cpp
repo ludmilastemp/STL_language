@@ -35,7 +35,6 @@ int main (const int argc, const char** argv)
     RecursiveDescentCtx ctx = {.str   = tree->buf,
                                .pos   = 0,
                                .nFunc = 0,
-                               .nVarInMain = 0,
                                .func  = &func,
                                .var   = &var,
                                .token = &token};
@@ -61,6 +60,7 @@ int main (const int argc, const char** argv)
     }
 
     tree->root = ParseProgram (&ctx);
+    tree->var  = &var;
 
     STL_GraphvizBinTree (tree, after_front_end);
     BinTreePrintPostorderWithoutNil (tree, argv2);
@@ -69,7 +69,7 @@ int main (const int argc, const char** argv)
     StackDtor (&func);
     StackDtor (&var);
 
-    printf ("\n\nОК!!!\n\n");
+    printf ("\n\nEND!!!\n\n");
 
     return 0;
 }

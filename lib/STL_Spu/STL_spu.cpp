@@ -91,7 +91,7 @@ static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
     int command = 0;
     SPU_DATA_TYPE var1 = 0, var2 = 0;
 
-    printf ("AAAAAAAAAAAA ip = %d\n", *ip);
+//    printf ("AAAAAAAAAAAA ip = %d\n", *ip);
     command = str[(*ip)++];
 
 //    printf ("ip = %d\n", *ip - 1);
@@ -133,7 +133,7 @@ static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
 
     // + : GetValue(arg1) + GetValue(arg2)
 
-    printf ("BBBBBBBBBBBB ip = %d\n\n", *ip);
+//    printf ("BBBBBBBBBBBB ip = %d\n\n", *ip);
 
     switch (command & 0x1F) /// 00 01 11 11
     {

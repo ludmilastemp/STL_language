@@ -2,7 +2,10 @@
 
 static int CompileMultipleOperations (BackEndCtx* ctx);
 static int CompileOperation          (BackEndCtx* ctx);
-static int CompileArguments          (BackEndCtx* ctx);
+static int CompileActualArguments    (BackEndCtx* ctx);
+static int CompileFormalArguments    (BackEndCtx* ctx);
+static int CompileVariableBeforeCall (BackEndCtx* ctx);
+static int CompileVariableAfterCall  (BackEndCtx* ctx);
 static int CompileFunction           (BackEndCtx* ctx);
 static int CompileFuncReturn         (BackEndCtx* ctx);
 static int CompilePrintf             (BackEndCtx* ctx);
@@ -11,6 +14,9 @@ static int CompileConditionOp        (BackEndCtx* ctx);
 static int CompileCreate             (BackEndCtx* ctx);
 static int CompileExpression         (BackEndCtx* ctx);
                            // сюда тоже IsOpCode и тп
+static void PrintfVar (BackEndCtx* ctx);
+
+const int nSpace = 20;
 
 int CompileProgram (BackEndCtx* ctx)
 {
@@ -22,6 +28,7 @@ int CompileProgram (BackEndCtx* ctx)
      *  Compile main
      */
     fprintf (ctx->fp, "\n:main");
+    fprintf (ctx->fp, "\n$ начало main");
 
     ctx->node = oldNode->left;
     CompileMultipleOperations (ctx);
@@ -29,19 +36,25 @@ int CompileProgram (BackEndCtx* ctx)
     oldNode = oldNode->right;
 
     fprintf (ctx->fp, "\n\n\t\thlt");
+    fprintf (ctx->fp, "\n$ конец main");
 
     /**
      *  Compile functions
      */
     while (oldNode != nullptr)
     {
+        printf ("\n\n\n\nFUNCTION N = %d\n\n\n\n", oldNode->data->function);
+
+        ctx->nVarBefore = ctx->nVarInFunc + 1;
+
+        fprintf (ctx->fp, "\n$ начало функции");
         fprintf (ctx->fp, "\n\n:func_%d_", oldNode->data->function);
 
     /**
      *  Compile arguments
      */
         ctx->node = oldNode->left->right;
-        CompileArguments (ctx);
+        CompileFormalArguments (ctx);
 
         fprintf (ctx->fp, "\n\n");
 
@@ -52,6 +65,7 @@ int CompileProgram (BackEndCtx* ctx)
         CompileMultipleOperations (ctx);
 
         fprintf (ctx->fp, "\n\n\t\tret");
+        fprintf (ctx->fp, "\n$ конец функции");
 
         oldNode = oldNode->right;
     }
@@ -67,7 +81,7 @@ static int CompileMultipleOperations (BackEndCtx* ctx)
 
     while (oldNode != nullptr)
     {
-        if (oldNode->data->opCode != END_STR)
+        if (oldNode->data->opCode != END_OPERATION)
         {
             printf ("ERROR in CompileMultipleOperations!!!\n\n");
             return ERROR_IN_CompileMultipleOperations;
@@ -117,12 +131,13 @@ static int CompileOperation (BackEndCtx* ctx)
     return 0;
 }
 
-static int CompileArguments (BackEndCtx* ctx)
+static int CompileFormalArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileArguments\n");
+    printf ("I in CompileFormalArguments\n");
 
-    if (ctx->node->data->opCode != END_STR)
+    if (ctx->node               == nullptr ||
+        ctx->node->data->opCode != END_OPERATION)
         return ERROR_IN_CompileArguments;
 
     NodeBinTree* oldNode = ctx->node;
@@ -130,7 +145,7 @@ static int CompileArguments (BackEndCtx* ctx)
     if (ctx->node->right != nullptr)
     {
         ctx->node = ctx->node->right;
-        CompileArguments (ctx);
+        CompileFormalArguments (ctx);
     }
 
     ctx->node = oldNode->left;
@@ -139,27 +154,27 @@ static int CompileArguments (BackEndCtx* ctx)
         ctx->node->data->type != NodeBinTreeData::T_VARIABLE)
         return ERROR_IN_CompileArguments;
 
-    fprintf (ctx->fp, "\n\t\tpop [%d]", ctx->node->data->variable);
+    int n = fprintf (ctx->fp, "\n\t\tpop [%d]", ctx->node->data->variable);
+
+    for (int j = 0; j < nSpace - n; j++)
+        fprintf (ctx->fp, " ");
+    PrintfVar (ctx);
 
     return 0;
 }
 
-static int CompileFunction (BackEndCtx* ctx)
+static int CompileActualArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileFunction\n");
+    printf ("I in CompileActualArguments\n");
 
-    if (ctx->node->data->type != NodeBinTreeData::T_FUNCTION)
-        return ERROR_IN_CompileFunction;
-
-    int nFunc = ctx->node->data->function;
     NodeBinTree* oldNode = nullptr;
 
     while (ctx->node->right != nullptr)
     {
         ctx->node = ctx->node->right;
 
-        if (ctx->node->data->opCode != END_STR)
+        if (ctx->node->data->opCode != END_OPERATION)
             return ERROR_IN_CompileFunction;
 
         oldNode   = ctx->node;
@@ -173,7 +188,76 @@ static int CompileFunction (BackEndCtx* ctx)
         fprintf (ctx->fp, "\n");
     }
 
+    return 0;
+}
+
+static int CompileVariableBeforeCall (BackEndCtx* ctx)
+{
+    assert (ctx);
+    printf ("I in CompileVariableBeforeCall\n");
+
+    for (int i = ctx->nVarBefore; i <= ctx->nVarInFunc; i++)
+    {
+        int n = fprintf (ctx->fp, "\n\t\tpush [%d]", i);
+
+        for (int j = 0; j < nSpace - n; j++)
+            fprintf (ctx->fp, " ");
+
+        fprintf (ctx->fp, "$ ");
+        for (int j = 0; j < ctx->var->data[i].len; j++)
+            fprintf (ctx->fp, "%c", ctx->var->data[i].name[j]);
+
+    }
+
+    fprintf (ctx->fp, "\n");
+
+    return 0;
+}
+
+static int CompileVariableAfterCall (BackEndCtx* ctx)
+{
+    assert (ctx);
+    printf ("I in CompileVariableAfterCall\n");
+
+    for (int i = ctx->nVarInFunc; i >= ctx->nVarBefore; i--)
+    {
+        int n = fprintf (ctx->fp, "\n\t\tpop [%d]", i);
+
+        for (int j = 0; j < nSpace - n; j++)
+            fprintf (ctx->fp, " ");
+
+        fprintf (ctx->fp, "$ ");
+        for (int j = 0; j < ctx->var->data[i].len; j++)
+            fprintf (ctx->fp, "%c", ctx->var->data[i].name[j]);
+
+    }
+
+    fprintf (ctx->fp, "\n");
+
+    return 0;
+}
+
+static int CompileFunction (BackEndCtx* ctx)
+{
+    assert (ctx);
+    printf ("I in CompileFunction\n");
+
+    if (ctx->node->data->type != NodeBinTreeData::T_FUNCTION)
+        return ERROR_IN_CompileFunction;
+
+    int nFunc = ctx->node->data->function;
+
+    fprintf (ctx->fp, "\n$ сохраняем значения переменных, до вызова функции");
+    CompileVariableBeforeCall (ctx);
+
+    fprintf (ctx->fp, "\n$ передаем аргументы");
+    CompileActualArguments (ctx);
+
+    fprintf (ctx->fp, "\n$ вызов функции");
     fprintf (ctx->fp, "\n\t\tcall :func_%d_\n", nFunc);
+
+    fprintf (ctx->fp, "\n$ возвращаем значения переменных, которые были до вызова функции");
+    CompileVariableAfterCall (ctx);
 
     return 0;
 }
@@ -191,6 +275,7 @@ static int CompileFuncReturn (BackEndCtx* ctx)
         ctx->node = ctx->node->right;
         CompileExpression (ctx);
 
+        fprintf (ctx->fp, "\n$ сохраняем значения return");
         fprintf (ctx->fp, "\n\t\tpop rax");
     }
 
@@ -297,8 +382,6 @@ static int CompileConditionOp (BackEndCtx* ctx)
         fprintf (ctx->fp, "\n\n:while_%d_body", ctx->nWhile);
     }
 
-//    fprintf (ctx->fp, "\n\n:aaa");
-
     ctx->node = oldNode->right->left;
     CompileMultipleOperations (ctx);
 
@@ -312,10 +395,9 @@ static int CompileConditionOp (BackEndCtx* ctx)
             ctx->node = oldNode->right->right;
             CompileMultipleOperations (ctx);
         }
-//        fprintf (ctx->fp, "\n\t\tjmp :if_%d_end", ctx->nIf);
+        fprintf (ctx->fp, "\n\t\tjmp :if_%d_end", ctx->nIf);
 
         fprintf (ctx->fp, "\n\n:if_%d_end\n\n", ctx->nIf);
-//        fprintf (ctx->fp, "\n\n:aaa\n\n");
         ctx->nIf++;
     }
 
@@ -350,7 +432,18 @@ static int CompileAssign (BackEndCtx* ctx)
 
     printf ("I in CompileAssign after right\n");
 
-    fprintf (ctx->fp, "\n\t\tpop [%d]", oldNode->left->data->variable);
+    int n = fprintf (ctx->fp, "\n\t\tpop [%d]", oldNode->left->data->variable);
+
+    for (int j = 0; j < nSpace - n; j++)
+        fprintf (ctx->fp, " ");
+
+    fprintf (ctx->fp, "$ ");
+    for (int j = 0; j < ctx->var->data[oldNode->left->data->variable].len; j++)
+        fprintf (ctx->fp, "%c", ctx->var->data[oldNode->left->data->variable].name[j]);
+
+
+    if (oldNode->left->data->variable > ctx->nVarInFunc)
+        ctx->nVarInFunc = oldNode->left->data->variable;
 
     ctx->node = oldNode;
 
@@ -379,6 +472,7 @@ static int CompileExpression (BackEndCtx* ctx)
 
         CompileFunction (ctx);
 
+        fprintf (ctx->fp, "\n$ push значение return");
         fprintf (ctx->fp, "\n\t\tpush rax");
 
         return 0;
@@ -413,7 +507,17 @@ static int CompileExpression (BackEndCtx* ctx)
 
         case NodeBinTreeData::T_VARIABLE:
 
-            fprintf (ctx->fp, "\n\t\tpush [%d]", ctx->node->data->variable);
+            {
+            int n = fprintf (ctx->fp, "\n\t\tpush [%d]", ctx->node->data->variable);
+
+            for (int j = 0; j < nSpace - n; j++)
+                fprintf (ctx->fp, " ");
+
+            PrintfVar (ctx);
+
+            if (ctx->node->data->variable > ctx->nVarInFunc)
+                ctx->nVarInFunc = ctx->node->data->variable;
+            }
 
             break;
 
@@ -482,30 +586,13 @@ static int CompileExpression (BackEndCtx* ctx)
                     fprintf (ctx->fp, "\n\t\tln");
 
                     break;
-        //
-        //        case ADD:
-        //
-        //            fprintf (ctx->fp, "\n\t\tadd");
-        //
-        //            break;
-        //
-        //        case ADD:
-        //
-        //            fprintf (ctx->fp, "\n\t\tadd");
-        //
-        //            break;
-        //
-        //        case ADD:
-        //
-        //            fprintf (ctx->fp, "\n\t\tadd");
-        //
-        //            break;
-        //
-        //        case ADD:
-        //
-        //            fprintf (ctx->fp, "\n\t\tadd");
-        //
-        //            break;
+
+                case PAT_IN:
+
+                    fprintf (ctx->fp, "\n\t\tin");
+
+                    break;
+
                 default:
                     printf ("ERROR in CompileExpression\n"
                             "opCode = %d\n", ctx->node->data->opCode);
@@ -519,4 +606,11 @@ static int CompileExpression (BackEndCtx* ctx)
     }
 
     return 0;
+}
+
+static void PrintfVar (BackEndCtx* ctx)
+{
+    fprintf (ctx->fp, "$ ");
+    for (int i = 0; i < ctx->var->data[ctx->node->data->variable].len; i++)
+    fprintf (ctx->fp, "%c", ctx->var->data[ctx->node->data->variable].name[i]);
 }

@@ -31,17 +31,9 @@ void STL_GraphvizBinTree (BinTree* tree, const int file)
 
 static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_Variable* stk)
 {
+    if (node == nullptr) return;
+
     fprintf (fp, "\nf%d", *num);
-
-    if (node == nullptr)
-    {
-        pr (" [ label = nil, \
-        fillcolor = \"#FFE0E0\", color = \"#FFA0A0\" ]\n");
-
-        (*num)++;
-
-        return;
-    }
 
     int curNum = *num;
 
@@ -57,7 +49,7 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
         case NodeBinTreeData::T_OPCODE:
 
             pr (" [ label = \" %s \", \
-            fillcolor = \"#E0FFE0\", color = \"#ACFFAC\" ]\n", operation[node->data->opCode]);
+            fillcolor = \"#E0FFE0\", color = \"#ACFFAC\" ]\n", keyWords[node->data->opCode]);
 
             break;
 
@@ -91,15 +83,15 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 
     (*num)++;
 
-//    if (node->left != nullptr)
-    if (node != nullptr)
+    if (node->left != nullptr)
+//    if (node != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->left, num);//, stk);
     }
 
-//    if (node->right != nullptr)
-    if (node != nullptr)
+    if (node->right != nullptr)
+//    if (node != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->right, num);//, stk);

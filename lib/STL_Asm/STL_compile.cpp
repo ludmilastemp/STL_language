@@ -149,6 +149,7 @@ static int CompileOperation (const char* string,
 
     string += SkipWhitespaces (string);
     if    (string[0] == 0)   return 0;
+    if    (string[0] == '$') return 0;
 
     if    (string[0] == ':')
     {
@@ -161,7 +162,7 @@ static int CompileOperation (const char* string,
     #include "../STL_Spu/include/STL_jmp.h"
 
     /* else */
-    {    printf ("VVVVVVVVVVVVVVVVVVVVVVVV\n%sNNNNNN", string);
+    {
         return ERROR_INCORRECT_FUNC;
     }
 
@@ -184,8 +185,8 @@ static int ParseArgs (const char* string,
     assert (fixups);
 
     SPU_DATA_TYPE arg = 0;
-    int  reg   = 0;
-    bool checkLabel = 0;
+    int  reg          = 0;
+    bool checkLabel   = 0;
 
 /// warning: conversion to 'OPCODE_T {aka unsigned char}'
 /// from 'int' may alter its value [-Wconversion]
