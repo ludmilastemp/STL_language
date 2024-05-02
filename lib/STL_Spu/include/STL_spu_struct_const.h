@@ -7,7 +7,7 @@
 char*
 STL_SpuErrPrint (int err);
 
-typedef int SPU_DATA_TYPE;   /// не забудь поменять тип в стеке
+typedef int SPU_DATA_TYPE;   /// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 typedef unsigned char OPCODE_T;
 
 const int nRegisters = 8;
@@ -15,7 +15,7 @@ const int nRegisters = 8;
 struct NewString
 {
     char* str;
-    int ip;
+    size_t ip;
 };
 
 enum ArgType

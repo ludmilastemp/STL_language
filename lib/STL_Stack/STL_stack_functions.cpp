@@ -10,9 +10,9 @@ static int  Compare   (const STACK_T* var1,
 static void STL_Print (const char* const fmt, ...);
 
 /**
-    \brief проверяет стек на корректность и выводит стек в случае ошибки
-    \param stk указатель на стек
-    \return код ошибки
+    \brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    \param stk пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+    \return пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 */
 #ifdef STACK_DEBUG
     #define StackVERIFICATOR(stk)                                   \
@@ -39,8 +39,8 @@ static void STL_Print (const char* const fmt, ...);
 #endif
 
 /**
-    \brief вывести стек
-    \param stk указатель на стек
+    \brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
+    \param stk пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
     \return void
 */
 #ifdef STACK_DEBUG
@@ -52,9 +52,9 @@ static void STL_Print (const char* const fmt, ...);
 #endif
 
 /**
-    \brief проверяет стек на корректность
-    \param stk указатель на стек
-    \return код ошибки
+    \brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    \param stk пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ
+    \return пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 */
 #define ReturnStackVerificator(stk)                                 \
         STL_StackVerificator ((stk))
@@ -98,7 +98,7 @@ STL_StackCtor (STACK* stk
 #endif
 
     /**
-     * Очистка файла
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
      */
     FILE* fp = fopen (logFile, "w");
     fclose (fp);
@@ -380,7 +380,7 @@ StackReallocUp (STACK* stk)
 
     if (stk->size < stk->capacity) return 0;
 
-    if (STACK_DEBUG_PRINT_V) printf ("I ReallocUp   size = %lld  capacity = %d\n",
+    if (STACK_DEBUG_PRINT_V) printf ("I ReallocUp   size = %lu  capacity = %lu\n",
                         stk->size, stk->capacity);
 
     stk->capacity *= (size_t)EXPAND_MULTIPLIER;
@@ -391,7 +391,7 @@ StackReallocUp (STACK* stk)
 
     if (StackRealloc (stk)) return stk->err;
 
-    if (STACK_DEBUG_PRINT_V) printf ("New --------- size = %d  capacity = %d\n",
+    if (STACK_DEBUG_PRINT_V) printf ("New --------- size = %lu  capacity = %lu\n",
                         stk->size, stk->capacity);
 
     return stk->err;
@@ -405,7 +405,7 @@ StackReallocDown (STACK* stk)
     if ((stk->size - 1) * EXPAND_MULTIPLIER * EXPAND_MULTIPLIER > stk->capacity ||
         stk->size == 1) return 0;
 
-    if (STACK_DEBUG_PRINT_V) printf ("I ReallocDown size = %lld  capacity = %lld\n",
+    if (STACK_DEBUG_PRINT_V) printf ("I ReallocDown size = %lu  capacity = %lu\n",
                         stk->size, stk->capacity);
 
     stk->capacity /= EXPAND_MULTIPLIER;
@@ -416,7 +416,7 @@ StackReallocDown (STACK* stk)
 
     if (StackRealloc (stk)) return stk->err;
 
-    if (STACK_DEBUG_PRINT_V) printf ("New---------- size = %lld  capacity = %lld\n",
+    if (STACK_DEBUG_PRINT_V) printf ("New---------- size = %lu  capacity = %lu\n",
                         stk->size, stk->capacity);
 
     return stk->err;

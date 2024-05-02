@@ -84,7 +84,7 @@ static int CompileFile (File* file,
     StackCtor (&labels);
     StackCtor (&fixups);
 
-    long long line = 0;
+    size_t line = 0;
     int error = 0;
 
     while (line < file->nLines)
@@ -97,12 +97,12 @@ static int CompileFile (File* file,
 
         if (error)
         {
-            printf ("line = %d\n", (int)line);
+            printf ("line = %lu\n", line);
             STL_SpuErrPrint (error);
             return ERROR_EXIT;
         }
     }
-/////////////////////////////////////////         "очень опасный дефайн, никогда не используй @d3phys"
+                                                                                                            /////////////////////////////////////////         "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ @d3phys"
     DoFixups (strByte->str, &labels, &fixups)                                    && ({ return ERROR_EXIT; 1; });
 
     LabelsDump (&labels);
@@ -115,7 +115,7 @@ static int CompileFile (File* file,
 }
 
 #define DEF_CMD(name, opCode, arg, ...)                                 \
-    if (strnicmp (string, #name, strlen(#name)) == 0)                   \
+    if (strncmp (string, #name, strlen(#name)) == 0)                   \
     {                                                                   \
         if (arg)                                                        \
         {                                                               \
@@ -130,7 +130,7 @@ static int CompileFile (File* file,
     } else
 
 #define MAKE_COND_JMP(name, opCode, ...)                                \
-    if (strnicmp (string, #name, strlen(#name)) == 0)                   \
+    if (strncmp (string, #name, strlen(#name)) == 0)                   \
     {                                                                   \
         ParseArgs (string + strlen(#name) + 1, opCode,                  \
                    strByte, labels, fixups);                            \
@@ -147,9 +147,12 @@ static int CompileOperation (const char* string,
     assert (labels);
     assert (fixups);
 
+    printf ("first symbol = %d %c\n", string[0], string[0]);
+
     string += SkipWhitespaces (string);
-    if    (string[0] == 0)   return 0;
-    if    (string[0] == '$') return 0;
+    if    (string[0] == 0)    return 0;
+    if    (string[0] == '\n') return 0;
+    if    (string[0] == '$')  return 0;
 
     if    (string[0] == ':')
     {
@@ -163,6 +166,9 @@ static int CompileOperation (const char* string,
 
     /* else */
     {
+            printf ("I'm default\n");
+            printf ("string = \n[%s]\n", string);
+
         return ERROR_INCORRECT_FUNC;
     }
 
@@ -269,7 +275,7 @@ static OPCODE_T CheckArgIsImm (const char** string,
 }
 
 #define DEF_REG(name, regCode)                                          \
-    else if (strnicmp (string, #name, strlen(#name)) == 0)              \
+    else if (strncmp (string, #name, strlen(#name)) == 0)              \
     {                                                                   \
         *reg = regCode;                                                 \
         string += strlen(#name);                                        \
@@ -295,7 +301,7 @@ static int EmitOpcode (const OPCODE_T opCode,
 {
     assert (strByte);
 
-    strByte->str[strByte->ip++] = opCode;
+    strByte->str[strByte->ip++] = (char)opCode;
     return 0;
 }
 
@@ -304,7 +310,12 @@ static int EmitImm (const SPU_DATA_TYPE arg,
 {
     assert (strByte);
 
-    *(SPU_DATA_TYPE*)(strByte->str + strByte->ip) = arg;
+    // *(SPU_DATA_TYPE*)(strByte->str + strByte->ip) = arg;
+    for (size_t i = 0; i < sizeof (SPU_DATA_TYPE); i++)
+    {
+        strByte->str[strByte->ip + i] = ((const char*)(&arg))[i];
+    }
+
     strByte->ip += sizeof (SPU_DATA_TYPE);
     return 0;
 }

@@ -1,176 +1,31 @@
+
 \VCEGO_XOROSHEGO
 
-    \gravo n :)
+    \gravo no :)
 
-    n ::= :( SolveQuadraticEquation >|< a >|< b >|< c ): :)
+    no ::= :( Factorial >|< no ): :)
 
-    c ::= 0 - 20 :)
-    b ::= 6 :)
-    a ::= \pat :)
+    no ::= 7 :)
 
-    \Z \ni n :)
+    \Z \ni no :)
 
 \teornma
 
-
 \oed
-    (: :( ZeroRoot ): :)
+    (: :( Factorial >|< (p) ): * k :)
+
 
     \katarce
-        discrim > 0
+        k == 1
     \katapanma
 
         <=>
 
     \katarce
-        (: :( TwoRootQuadraticEquation >|< a >|< b >|< c >|< discrim ): :)
+        (: 1 :)
     \katapanma  :)
 
-
-    \katarce
-        discrim == 0
-    \katapanma
-
-        <=>
-
-    \katarce
-        (: :( OneRootQuadraticEquation >|< a >|< b >|< c ): :)
-    \katapanma  :)
+    p ::= k - 1 :)
 
 
-    discrim ::= :( Discrim >|< a >|< b >|< c ): :)
-
-
-    \katarce
-        a == 0
-    \katapanma
-
-        <=>
-
-    \katarce
-        (: :( SolveLinearEquation >|< b >|< c ): :)
-    \katapanma  :)
-
-
-\lemma :( SolveQuadraticEquation >|< a >|< b >|< c ):
-
-
-\oed
-    (: :( ZeroRoot ): :)
-
-    \katarce
-        c == 0
-    \katapanma
-
-        <=>
-
-    \katarce
-        (: :( InfinitelyRoot ): :)
-    \katapanma  :)
-
-
-    \katarce
-        b != 0
-    \katapanma
-
-        <=>
-
-    \katarce
-        (: :( OneRootLinearEquation >|< b >|< c ): :)
-    \katapanma  :)
-
-
-\lemma :( SolveLinearEquation >|< b >|< c ):
-
-
-\oed
-    (: discrim :)
-
-    discrim ::= b * b - 4 * a * c :)
-
-\lemma :( Discrim >|< a >|< b >|< c ):
-
-
-\oed
-    (: 0 :)
-
-    \gravo 0 :)
-    \gravo 0 :)
-    \gravo 0 :)
-
-\lemma :( ZeroRoot ):
-
-
-\oed
-    (: 1 :)
-
-    \gravo (0 - 1) * c / b :)
-
-\lemma :( OneRootLinearEquation >|< b >|< c ):
-
-
-\oed
-    (: 1 :)
-
-    \gravo (0 - 1) * b / (2 * a) :)
-
-\lemma :( OneRootQuadraticEquation >|< a >|< b >|< c ):
-
-
-\oed
-    (: 2 :)
-
-    \gravo ( (0 - 1) * b + sqrt (discrim) ) / (2 * a) :)
-    \gravo ( (0 - 1) * b - sqrt (discrim) ) / (2 * a) :)
-
-\lemma :( TwoRootQuadraticEquation >|< a >|< b >|< c >|< discrim ):
-
-
-\oed
-    (: 888 :)
-
-    \gravo 8 :)
-    \gravo 8 :)
-    \gravo 8 :)
-
-\lemma :( InfinitelyRoot ):
-
-
-=^..^=
-=^. Вас приветстует древнегреческий latex                           .^=
-=^. Пока греки изучали latex, они полностью запутались              .^=
-=^. поэтому нам теперь нужно помнить несколько правил               .^=
-=^..^=
-=^. 0  и самое важное! Программа пишется снизу вверх                .^=
-=^. 1.                                                              .^=
-=^. 2. В конце каждой операции нужно улыбнуться :)                  .^=
-=^. 3. Для присваивания значения переменной ::=                     .^=
-=^. 4. Для создания переменной используйте \Z \ni                   .^=
-=^. 5. Для вывода переменной используйте \gravo                     .^=
-=^. 6. if    это    \katarce ~condition~  \katapanma
-               <=>  \katarce ~body~       \katapanma  :)            .^=
-=^. 7. while это    \katarce ~condition~  \katapanma
-              <?=?> \katarce ~body~       \katapanma  :)            .^=
-=^. 8. Начало функции - lemma                                       .^=
-=^. 9. Конец  функции - oed (oper edei deixai)                      .^=
-=^. 10. Возвращаемое значение (: :)                                 .^=
-=^. 11. Для вызова функции используйте :( ):                        .^=
-=^. 12. Для перечисления переменных используйте >|<                 .^=
-=^..^=
-=^..^=
-=^. В конце нужно пожелать богам программы всего хорошего!          .^=
-=^..^=
-=^..^=
-=^..^=
-
-
-=^.
-double
-middle end
-0 - 1   -> -1
-
-
-else       .^=
-
-
-
+\lemma :( Factorial >|< k ):

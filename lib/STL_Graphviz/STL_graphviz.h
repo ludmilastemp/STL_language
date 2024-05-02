@@ -5,10 +5,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys\stat.h>
 #include <assert.h>
 
-#include "../../lib/STL_Bintree/STL_bintree_struct.h"
+#include "../../lib/STL_BinTree/STL_bintree_struct.h"
 
 enum
 {

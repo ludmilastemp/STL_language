@@ -9,13 +9,13 @@
 
 struct STL_Header
 {
-   char magic[5] = {'S', 'T', 'L', ' ', 'v'};
+   const char magic[5] = {'S', 'T', 'L', ' ', 'v'};
    char version = 0;
    char xax = '\0';
 };
 
-int WriteSignature (const int version, char* str, int* ip);
+int WriteSignature (const int version, char* str, size_t* ip);
 
-int CheckFileSignature (const char* const str, int* ip, const int version);
+int CheckFileSignature (const char* const str, size_t* ip, const int version);
 
 #endif /* STL_header_ */

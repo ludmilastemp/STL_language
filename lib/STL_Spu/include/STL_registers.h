@@ -1,17 +1,17 @@
 /* DEF_REG (name, opCode) */
 
-/// opCode должен быть меньше 8  -- >> ISA!!!
+/// opCode пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 8  -- >> ISA!!!
 
-DEF_REG (MEOW, 0)
+DEF_REG (meow, 0)
 
-DEF_REG (RAX, 1)
+DEF_REG (rax, 1)
 
-DEF_REG (RBX, 2)
+DEF_REG (rbx, 2)
 
-DEF_REG (D3PHYS, 3)
+DEF_REG (d3phys, 3)
 
-DEF_REG (RCX, 4)
+DEF_REG (rcx, 4)
 
-DEF_REG (RDX, 5)
+DEF_REG (rdx, 5)
 
-DEF_REG (REX, 6)
+DEF_REG (rex, 6)

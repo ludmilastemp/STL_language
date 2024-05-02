@@ -20,7 +20,7 @@
     #define CANARY_PRINT_SPECIFIER "%d"
 #endif
 
-/// структура стека
+/// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 struct STACK
 {
 #ifdef STACK_CANARY_PROTECTION
@@ -35,8 +35,8 @@ struct STACK
 #endif
 
     STACK_T* data;
-    long long size;
-    long long capacity;
+    size_t size;
+    size_t capacity;
     StackErrorType err;
 
 #ifdef STACK_HASH_PROTECTION

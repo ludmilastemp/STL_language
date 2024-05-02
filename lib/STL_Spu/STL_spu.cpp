@@ -5,16 +5,16 @@ const int RAM_SIZE = 1000;
 static SPU_DATA_TYPE ram[RAM_SIZE] = { 0 };
 static int index_ret = 610;
 
-static int Execute (const char* const str, int ip);
+static int Execute (const char* const str, size_t ip);
 
-static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu);
+static int ExecuteCommand (const char* const str, size_t* ip, SPU_Struct* spu);
 
-static int DecodeArg (const char* const str, int* ip, int command,
+static int DecodeArg (const char* const str, size_t* ip, int command,
         SPU_Struct* spu, SPU_DATA_TYPE* arg, int** argPtr);
 
 static int VideoMemory (const int length, const int width);
 
-static int ReadFile (char** str, const char* const fileName, int* ip);
+static int ReadFile (char** str, const char* const fileName, size_t* ip);
 
 // #define verified  || AssertFailed ((__LINE__)
 // #define verified  || ({ return 1; })
@@ -24,7 +24,7 @@ int SPU (const char* fileName)
     assert (fileName);
 
     char* str = 0;
-    int ip = 0;
+    size_t ip = 0;
 
     if (ReadFile (&str, fileName, &ip))
     {
@@ -40,7 +40,7 @@ int SPU (const char* fileName)
 }
 
 
-static int Execute (const char* const str, int ip)
+static int Execute (const char* const str, size_t ip)
 {
     assert (str);
 
@@ -79,16 +79,16 @@ static int Execute (const char* const str, int ip)
     case opCode:                                                        \
         DO_POP (&var2);                                                 \
         DO_POP (&var1);                                                 \
-        if (var1 sign var2) *ip = arg;                                  \
+        if (var1 sign var2) *ip = (size_t)arg;                          \
         break;
 
-static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
+static int ExecuteCommand (const char* const str, size_t* ip, SPU_Struct* spu)
 {
     assert (str);
     assert (ip);
     assert (spu);
 
-    int command = 0;
+    int command = 0; // char
     SPU_DATA_TYPE var1 = 0, var2 = 0;
 
 //    printf ("AAAAAAAAAAAA ip = %d\n", *ip);
@@ -143,9 +143,9 @@ static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
 
         default:
             printf ("I'm default\n");
-            printf ("command = 0x%x\n", command);
-            printf ("        = 0x%x\n", command & 0x1F);
-            printf ("ip = %d\n", *ip);
+            printf ("command = 0x%x\n", (unsigned int)command);
+            printf ("        = 0x%x\n", (unsigned int)command & 0x1F);
+            printf ("ip = %lu\n", *ip);
 
             return ERROR_INCORRECT_FUNC;
     }
@@ -159,7 +159,7 @@ static int ExecuteCommand (const char* const str, int* ip, SPU_Struct* spu)
 
 #undef MAKE_COND_JMP
 
-static int DecodeArg (const char* const str, int* ip, int command,
+static int DecodeArg (const char* const str, size_t* ip, int command,
         SPU_Struct* spu, SPU_DATA_TYPE* arg, int** argPtr)
 {
     assert (str);
@@ -170,7 +170,12 @@ static int DecodeArg (const char* const str, int* ip, int command,
 
     if (command & T_ARG_IMM)
     {
-        *arg = *(const SPU_DATA_TYPE*)(str + *ip);
+        // *arg = *(const SPU_DATA_TYPE*)(str + *ip);
+        for (size_t i = 0; i < sizeof (SPU_DATA_TYPE); i++)
+        {
+            ((char*)arg)[i] = *(const char*)(str + *ip + i);
+        }
+
         *ip += sizeof (SPU_DATA_TYPE);
     }
 
@@ -211,7 +216,7 @@ static int VideoMemory (const int length, const int width)
     return 0;
 }
 
-static int ReadFile (char** str, const char* const fileName, int* ip)
+static int ReadFile (char** str, const char* const fileName, size_t* ip)
 {
     assert (str);
     assert (fileName);

@@ -11,18 +11,18 @@ SubtreePrintAccordingToStandard (NodeBinTree* node,
 
 static NodeBinTree*
 NodeBinTreeCtorPostorderWithoutNil (char* const buf,
-                                    int* len, Stack_Variable* var);
+                                    size_t* len, Stack_Variable* var);
 
 static NodeBinTreeData*
 ReadDataNodeBinTree (char* const buf,
-                     int* len, Stack_Variable* var);
+                     size_t* len, Stack_Variable* var);
 
-static int
+static size_t
 FindName (Variable var1, Stack_Variable* var);
 
 static NodeBinTree*
 ReadBranchNodeBinTreeWithoutNil (char* const buf,
-                                 int* len, Stack_Variable* var);
+                                 size_t* len, Stack_Variable* var);
 
 NodeBinTree*
 NodeBinTreeCtor (NodeBinTreeData* data,
@@ -56,12 +56,16 @@ NodeBinTreeDtor (NodeBinTree* node)
     NodeBinTreeDtor (node->left);
     NodeBinTreeDtor (node->right);
 
-    node->data->type     = NodeBinTreeData::TYPE_POISON;
-    node->data->value    = NodeBinTreeData::VALUE_POISON;
-    node->data->opCode   = NodeBinTreeData::OPCODE_POISON;
-    node->data->variable = NodeBinTreeData::VARIABLE_POISON;
-    node->data->function = NodeBinTreeData::FUNCTION_POISON;
-    node->data   = nullptr;            // free data?
+    // if (node->data != nullptr)
+    // {
+    //     node->data->type     = NodeBinTreeData::TYPE_POISON;
+    //     node->data->value    = NodeBinTreeData::VALUE_POISON;
+    //     node->data->opCode   = NodeBinTreeData::OPCODE_POISON;
+    //     node->data->variable = NodeBinTreeData::VARIABLE_POISON;
+    //     node->data->function = NodeBinTreeData::FUNCTION_POISON;
+    // }
+    if (node->data->freeData) free (node->data);
+    node->data   = nullptr;           
     node->left   = nullptr;
     node->right  = nullptr;
     node->parent = nullptr;
@@ -95,12 +99,13 @@ BinTreeDtor (BinTree* binTree)
     if (binTree == nullptr) return nullptr;
 
     NodeBinTreeDtor (binTree->root);
-    if (binTree->buf != nullptr) free (binTree->buf);
 
     binTree->root = nullptr;
     binTree->buf  = nullptr;
     binTree->size = 0;
     binTree->var  = nullptr;
+
+    free (binTree);
 
     return nullptr;
 }
@@ -120,6 +125,7 @@ NodeBinTreeDataCtor (int type, int value, int opCode, int variable, int function
     data->opCode   = opCode;
     data->variable = variable;
     data->function = function;
+    data->freeData = true;
 
     return data;
 }
@@ -194,8 +200,8 @@ SubtreePrintPostorderWithoutNil (NodeBinTree* node, Stack_Variable* var, FILE* f
 
     if (node->data->variable != NodeBinTreeData::VARIABLE_POISON)
     {
-        fprintf (fp, " %d ", var->data[node->data->variable].len);
-        for (int i = 0; i < var->data[node->data->variable].len; i++)
+        fprintf (fp, " %lu ", var->data[node->data->variable].len);
+        for (size_t i = 0; i < var->data[node->data->variable].len; i++)
             fprintf (fp, "%c", var->data[node->data->variable].name[i]);
 
         fprintf (fp, " ");
@@ -247,7 +253,7 @@ SubtreePrintAccordingToStandard (NodeBinTree* node, FILE* fp)
         case NodeBinTreeData::T_VALUE:
 
             fprintf (fp, "%d ", VALUE);
-            fprintf (fp, "%lg ", node->data->value);
+            fprintf (fp, "%d ", node->data->value);
 
             break;
 
@@ -359,14 +365,14 @@ BinTreeReadPostorderWithoutNil (struct File* file, Stack_Variable* var)
     BinTree* tree  = BinTreeCtor ();
     tree->buf = file->text;
 
-    int fileIndex = 0;
+    size_t fileIndex = 0;
     tree->root = NodeBinTreeCtorPostorderWithoutNil (tree->buf, &fileIndex, var);
 
     return tree;
 }
 
 static NodeBinTree*
-NodeBinTreeCtorPostorderWithoutNil (char* const buf, int* len, Stack_Variable* var)
+NodeBinTreeCtorPostorderWithoutNil (char* const buf, size_t* len, Stack_Variable* var)
 {
     if (buf == nullptr || len == nullptr)
     {
@@ -395,7 +401,7 @@ NodeBinTreeCtorPostorderWithoutNil (char* const buf, int* len, Stack_Variable* v
 }
 
 static NodeBinTreeData*
-ReadDataNodeBinTree (char* const buf, int* len, Stack_Variable* var)
+ReadDataNodeBinTree (char* const buf, size_t* len, Stack_Variable* var)
 {
     if (buf == nullptr || len == nullptr)
     {
@@ -407,19 +413,24 @@ ReadDataNodeBinTree (char* const buf, int* len, Stack_Variable* var)
 
     int nLen = 0;
     sscanf (buf + *len, "%d%n", &data->type, &nLen);
-    *len += nLen;
+    *len += (size_t)nLen;
+    // printf ("type = %d\n", data->type);
 
     sscanf (buf + *len, "%d%n", &data->value, &nLen);
-    *len += nLen;
+    *len += (size_t)nLen;
+    // printf ("value = %d\n", data->value);
 
     sscanf (buf + *len, "%d%n", &data->opCode, &nLen);
-    *len += nLen;
+    *len += (size_t)nLen;
+    // printf ("opCode = %d\n", data->opCode);
 
     sscanf (buf + *len, "%d%n", &data->function, &nLen);
-    *len += nLen;
+    *len += (size_t)nLen;
+    // printf ("function = %d\n", data->function);
 
     sscanf (buf + *len, "%d%n", &data->variable, &nLen);
-    *len += nLen;
+    *len += (size_t)nLen;
+    // printf ("variable = %d\n", data->variable);
 
     if (data->variable != NodeBinTreeData::VARIABLE_POISON)
     {
@@ -427,18 +438,18 @@ ReadDataNodeBinTree (char* const buf, int* len, Stack_Variable* var)
 
         Variable var1 = { .name = 0, .len = 0 };
 
-        int a = 0;
+        size_t a = 0;
 
-        sscanf (buf + *len, "%d%n", &a, &nLen);
-        *len += nLen + 1;
+        sscanf (buf + *len, "%lu%n", &a, &nLen);
+        *len += (size_t)nLen + 1;
 
         var1.name = buf + *len;
         var1.len  = a;
 
-        for (int i = 0; i < var1.len; i++)
+        for (size_t i = 0; i < var1.len; i++)
             printf ("~%c~", var1.name[i]);
 
-        data->variable = FindName (var1, var);
+        data->variable = (int)FindName (var1, var);
 
         *len += var1.len + 1;
     }
@@ -446,28 +457,8 @@ ReadDataNodeBinTree (char* const buf, int* len, Stack_Variable* var)
     return data;
 }
 
-static int
-FindName (Variable var1, Stack_Variable* var)
-{
-    assert (var);
-
-    int elem = 0;
-    for (; elem < var->size; elem++)
-    {
-        if (strncmp (var->data[elem].name, var1.name, var1.len) == 0)
-        {
-            printf ("%d\n", var1.len);
-            return elem;
-        }
-    }
-
-    StackPush (var, var1);
-
-    return elem;
-}
-
 static NodeBinTree*
-ReadBranchNodeBinTreeWithoutNil (char* const buf, int* len, Stack_Variable* var)
+ReadBranchNodeBinTreeWithoutNil (char* const buf, size_t* len, Stack_Variable* var)
 {
     if (buf == nullptr || len == nullptr)
     {
@@ -487,7 +478,27 @@ ReadBranchNodeBinTreeWithoutNil (char* const buf, int* len, Stack_Variable* var)
     }
 
     printf ("ERROR IN ReadBranchNodeBinTreeWithoutNil\n\n");
-    printf ("%d %s", buf[(*len)], buf + *len );
+    printf ("len = %lu\nsymbol = %d\nstring = %s\n", *len, buf[(*len)], buf + *len );
 
     return nullptr;
+}
+
+static size_t
+FindName (Variable var1, Stack_Variable* var)
+{
+    assert (var);
+
+    size_t elem = 0;
+    for (; elem < var->size; elem++)
+    {
+        if (strncmp (var->data[elem].name, var1.name, var1.len) == 0)
+        {
+            printf ("%lu\n", var1.len);
+            return elem;
+        }
+    }
+
+    StackPush (var, var1);
+
+    return elem;
 }

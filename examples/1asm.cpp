@@ -1,8 +1,7 @@
-
 :main
 $ начало main
 
-		push 5
+		push 7
 		pop [0]          $ no
 
 $ сохраняем значения переменных, до вызова функции
@@ -22,7 +21,7 @@ $ push значение return
 		pop [0]          $ no
 
 		push [0]         $ no
-		OUT
+		out
 
 
 		hlt

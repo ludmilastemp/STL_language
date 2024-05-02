@@ -49,14 +49,14 @@ int main (const int argc, const char** argv)
                 "\n\ttype     = %d"
                 "\n\tvalue    = %d"
                 "\n\topCode   = %d"
-                "\n\tvariable = %d"
-                "\n\tfunction = %d\n",
+                "\n\tfunction = %d"
+                "\n\tvariable = %d\n",
                  i,
                  token.data[i].type,
                  token.data[i].value,
                  token.data[i].opCode,
-                 token.data[i].variable,
-                 token.data[i].function);
+                 token.data[i].function,
+                 token.data[i].variable);
     }
 
     tree->root = ParseProgram (&ctx);
@@ -65,9 +65,13 @@ int main (const int argc, const char** argv)
     STL_GraphvizBinTree (tree, after_front_end);
     BinTreePrintPostorderWithoutNil (tree, argv2);
 
+    BinTreeDtor (tree);
+    
     StackDtor (&token);
     StackDtor (&func);
     StackDtor (&var);
+
+    STL_Fclose (&file);
 
     printf ("\n\nEND!!!\n\n");
 

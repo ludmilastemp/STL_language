@@ -2,7 +2,7 @@
 #define STL_file_open_
 
 #include <stdlib.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #include <string.h> //
 #include <assert.h>
 

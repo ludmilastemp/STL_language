@@ -1,10 +1,12 @@
 #ifndef STL_label_struct_
 #define STL_label_struct_
 
+#include <stdio.h>
+
 struct Label
 {
     const char* name;
-    int lenName;
+    size_t lenName;
     int address;
     static const int POISON = -1;
 };

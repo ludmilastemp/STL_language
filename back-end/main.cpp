@@ -43,6 +43,10 @@ int main (const int argc, const char** argv)
 
     fclose (fp);
 
+    StackDtor (&var);
+    BinTreeDtor (tree);
+    STL_Fclose (&file);
+
     printf ("\n\nОК!!!\n\n");
 
     return 0;

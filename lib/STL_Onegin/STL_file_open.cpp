@@ -1,6 +1,6 @@
 #include "STL_file_open.h"
 
-static int CountNumberOfLines (char* text, size_t size);
+static size_t CountNumberOfLines (char* text, size_t size);
 
 static void SplitIntoLines (struct File* file);
 
@@ -15,7 +15,7 @@ char* STL_Fread (struct File* file)
 
     fstat (fileno (file->fp), &buff);
 
-    file->size = buff.st_size;
+    file->size = (size_t)buff.st_size;
 
     file->text = (char*) calloc (file->size + 1, sizeof (char));
     assert (file->text);
@@ -25,15 +25,15 @@ char* STL_Fread (struct File* file)
     // git undo commit
     // git diff <>
     /**
-     * Сhecking for the correctness of entering the last line
+     * пїЅhecking for the correctness of entering the last line
      * If the last line does not end with \n,
      * add \n to the end of the buffer and
      * increases the file size by 1
      *
      * Why?
-     * Вставим '\n' в конец файла, чтобы не вставлять лишние проверки
-     * на каждую итерацию цикла обработки строк.
-     * (см. Split....)
+     * пїЅпїЅпїЅпїЅпїЅпїЅпїЅ '\n' пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+     * пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+     * (пїЅпїЅ. Split....)
      */
 
      // Split
@@ -59,7 +59,7 @@ String* STL_SplitFileIntoLines (File* file, const char* name)
 
     file->nLines = CountNumberOfLines (file->text, file->size);
 
-    file->strings = (String*) calloc (file->nLines + 1, sizeof (String));
+    file->strings = (String*) calloc (file->nLines, sizeof (String));
     assert (file->strings);
 
     SplitIntoLines (file);
@@ -67,7 +67,7 @@ String* STL_SplitFileIntoLines (File* file, const char* name)
     return file->strings;
 }
 
-static int CountNumberOfLines (char* text, size_t size)
+static size_t CountNumberOfLines (char* text, size_t size)
 {
     size_t numberOfLines = 0;
 
@@ -89,27 +89,24 @@ static void SplitIntoLines (File* file)
     size_t pos = 0;
 
     (file->strings + line)->str = (file->text + pos);
-
     line++;
-    pos++;
 
     char* ptr = file->text;
 
-    for (; line < file->nLines + 1; line++)
+    for (; line < file->nLines; line++)
     {
         ptr = strchr (ptr + 1, '\n');
-        pos = ptr - file->text;
+        pos = (size_t)(ptr - file->text);
+
+        // printf ("line = %lu pos = %lu\n\n", line, pos);
 
         (file->strings + line)    ->str = (file->text + pos + 1);
-        (file->strings + line - 1)->len = (file->strings + line)->str
-                                          - (file->strings + line - 1)->str - 1;
-
-        pos++;
-
+        (file->strings + line - 1)->len = (size_t)((file->strings + line)->str
+                                          - (file->strings + line - 1)->str - 1);
     }
 
-    (file->strings + line - 1)->len = (file->strings + line)->str
-                                      - (file->strings + line - 1)->str - 1;
+    (file->strings + line - 1)->len = (size_t)(file->text + pos + 1//(file->strings + line)->str
+                                      - (file->strings + line - 1)->str - 1);
 }
 
 int STL_Fclose (struct File* file)

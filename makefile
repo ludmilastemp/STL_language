@@ -23,9 +23,8 @@ front-end: 	front-end/main.cpp 								\
 		temp/stack_node_error.o                     		\
 		temp/stack_var_func.o                      			\
 		temp/stack_var_error.o                     			\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body\
-		-Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE\
-		-Wformat-security -Wformat=1 -o front-end.exe
+		$(FLAGS)											\
+		-o front-end.exe
 
 
 back-end: 	back-end/main.cpp 								\
@@ -49,9 +48,8 @@ back-end: 	back-end/main.cpp 								\
 		lib/STL_Onegin/STL_file_open.cpp        			\
 		temp/stack_var_func.o                      			\
 		temp/stack_var_error.o                     			\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body\
-		-Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE\
-		-Wformat-security -Wformat=1 -o back-end.exe
+		$(FLAGS)											\
+		-o back-end.exe
 
 compile: 	lib/STL_Asm/main.cpp 							\
 			lib/STL_Asm/STL_compile.h 						\
@@ -59,10 +57,6 @@ compile: 	lib/STL_Asm/main.cpp 							\
 			lib/STL_Asm/STL_label.h        					\
 			lib/STL_Asm/STL_label.cpp   					\
 			lib/STL_Asm/STL_label_struct.h 					\
-			lib/STL_Asm/stack_label_func.o 					\
-			lib/STL_Asm/stack_label_error.o 				\
-			lib/STL_Asm/stack_fixup_func.o 					\
-			lib/STL_Asm/stack_fixup_error.o             	\
 			lib/STL_Spu/include/STL_spu_struct_const.h  	\
 			lib/STL_Spu/include/STL_spu_struct_const.cpp	\
 			lib/STL_Onegin/STL_string.h                 	\
@@ -70,26 +64,29 @@ compile: 	lib/STL_Asm/main.cpp 							\
 			lib/STL_Onegin/STL_header.cpp					\
 			lib/STL_Onegin/STL_file_open.h 					\
 			lib/STL_Onegin/STL_file_open.cpp				\
+			temp/stack_label_func.o                      	\
+			temp/stack_label_error.o                    	\
+			temp/stack_fixup_func.o                      	\
+			temp/stack_fixup_error.o                     	\
 
 	g++ lib/STL_Asm/main.cpp 								\
 		lib/STL_Asm/STL_compile.cpp 						\
 		lib/STL_Asm/STL_label.cpp 							\
-		lib/STL_Asm/stack_label_func.o 						\
-		lib/STL_Asm/stack_label_error.o 					\
-		lib/STL_Asm/stack_fixup_func.o 						\
-		lib/STL_Asm/stack_fixup_error.o 					\
 		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
 		lib/STL_Onegin/STL_header.cpp						\
 		lib/STL_Onegin/STL_file_open.cpp					\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE -o compile.exe
+		temp/stack_label_func.o                      		\
+		temp/stack_label_error.o                     		\
+		temp/stack_fixup_func.o                      		\
+		temp/stack_fixup_error.o                     		\
+		$(FLAGS)											\
+		-o compile.exe
 
 spu:    	lib/STL_Spu/main.cpp 							\
 			lib/STL_Spu/STL_spu.h   						\
 			lib/STL_Spu/STL_spu.cpp 						\
 			lib/STL_Spu/STL_spu_struct.h 					\
 			lib/STL_Spu/STL_spu_struct.cpp 					\
-			lib/STL_Spu/stack_int_func.o 					\
-			lib/STL_Spu/stack_int_error.o                   \
 			lib/STL_Spu/include/STL_spu_struct_const.h      \
 			lib/STL_Spu/include/STL_spu_struct_const.cpp    \
 			lib/STL_Onegin/STL_string.h                     \
@@ -97,16 +94,19 @@ spu:    	lib/STL_Spu/main.cpp 							\
 			lib/STL_Onegin/STL_file_open.cpp				\
 			lib/STL_Onegin/STL_header.h						\
 			lib/STL_Onegin/STL_header.cpp					\
+			temp/stack_int_func.o 							\
+			temp/stack_int_error.o 							\
 
 	g++ lib/STL_Spu/main.cpp 								\
 		lib/STL_Spu/STL_spu.cpp 							\
 		lib/STL_Spu/STL_spu_struct.cpp 						\
-		lib/STL_Spu/stack_int_func.o 						\
-		lib/STL_Spu/stack_int_error.o 						\
 		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
 		lib/STL_Onegin/STL_file_open.cpp					\
 		lib/STL_Onegin/STL_header.cpp						\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE -o spu.exe
+		temp/stack_int_func.o 								\
+		temp/stack_int_error.o 								\
+		$(FLAGS)											\
+		-o spu.exe
 
 front-end_-1:                                               \
 			front-end_-1/main.cpp 							\
@@ -128,11 +128,10 @@ front-end_-1:                                               \
 		lib/STL_BinTree/STL_bintree_struct.cpp        		\
 		lib/STL_Graphviz/STL_graphviz.cpp					\
 		lib/STL_Onegin/STL_file_open.cpp        			\
-			temp/stack_var_func.o                      		\
-			temp/stack_var_error.o                     		\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body\
-		-Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE\
-		-Wformat-security -Wformat=1 -o front_-1.exe
+		temp/stack_var_func.o                      			\
+		temp/stack_var_error.o                     			\
+		$(FLAGS)											\
+		-o front-end-1.exe
 
 middle-end: middle-end/main.cpp 							\
 			middle-end/STL_simplify.h  						\
@@ -154,9 +153,8 @@ middle-end: middle-end/main.cpp 							\
 		lib/STL_BinTree/STL_bintree_struct.cpp        		\
 		lib/STL_Graphviz/STL_graphviz.cpp					\
 		lib/STL_Onegin/STL_file_open.cpp        			\
-		-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations -Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wempty-body\
-		-Wignored-qualifiers -Wlogical-op -Wno-missing-field-initializers -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstack-usage=8192 -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits -Wwrite-strings -Werror=vla -D_DEBUG -D_EJUDGE_CLIENT_SIDE\
-		-Wformat-security -Wformat=1 -o middle-end.exe
+		$(FLAGS)											\
+		-o middle-end.exe
 
 
 .PHONY: front-end middle-end back-end front-end_-1 compile disasm spu clean
@@ -165,9 +163,77 @@ middle-end: middle-end/main.cpp 							\
 
 # .o для стека
 
-#g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE='\"../../front-end/STACK_FILE_TYPE_variable.h\"' -o temp/stack_var_func.o
+# g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE=\"../../front-end/STACK_FILE_TYPE_variable.h\" -o temp/stack_var_func.o
+# g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE=\"../../front-end/STACK_FILE_TYPE_variable.h\" -o temp/stack_var_error.o
+# g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE=\"../STL_BinTree/STACK_FILE_TYPE_NODE.h\" -o temp/stack_node_func.o
+# g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE=\"../STL_BinTree/STACK_FILE_TYPE_NODE.h\" -o temp/stack_node_error.o
 
-#g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE='\"../../front-end/STACK_FILE_TYPE_variable.h\"' -o temp/stack_var_error.o
 
-#g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE='\"../STL_BinTree/STACK_FILE_TYPE_NODE.h\"' -o temp/stack_node_func.o
-#g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE='\"../STL_BinTree/STACK_FILE_TYPE_NODE.h\"' -o temp/stack_node_error.o
+FLAGS = -O3 										\
+		-D											\
+		_DEBUG										\
+		-ggdb3										\
+		-pie										\
+		-std=c++17									\
+		-Waggressive-loop-optimizations 			\
+		-Wall										\
+		-Wc++14-compat								\
+		-Wcast-align								\
+		-Wcast-qual									\
+		-Wchar-subscripts							\
+		-Wconditionally-supported					\
+		-Wconversion								\
+		-Wctor-dtor-privacy							\
+		-Weffc++									\
+		-Wempty-body								\
+		-Werror=vla									\
+		-Wextra										\
+		-Wfloat-equal								\
+		-Wformat-nonliteral							\
+		-Wformat-security							\
+		-Wformat-signedness							\
+		-Wformat=2									\
+		-Winit-self									\
+		-Winline									\
+		-Wlarger-than=8192							\
+		-Wlogical-op								\
+		-Wmissing-declarations						\
+		-Wno-literal-suffix							\
+		-Wno-missing-field-initializers				\
+		-Wno-narrowing								\
+		-Wno-old-style-cast							\
+		-Wno-varargs								\
+		-Wnon-virtual-dtor							\
+		-Wopenmp-simd								\
+		-Woverloaded-virtual						\
+		-Wpacked									\
+		-Wpointer-arith								\
+		-Wredundant-decls							\
+		-Wshadow									\
+		-Wsign-conversion							\
+		-Wsign-promo								\
+		-Wstack-protector							\
+		-Wstack-usage=8192							\
+		-Wstrict-null-sentinel						\
+		-Wstrict-overflow=2							\
+		-Wsuggest-attribute=noreturn				\
+		-Wsuggest-final-methods						\
+		-Wsuggest-final-types						\
+		-Wsuggest-override							\
+		-Wswitch-default							\
+		-Wswitch-enum								\
+		-Wsync-nand									\
+		-Wundef										\
+		-Wunreachable-code							\
+		-Wunused									\
+		-Wuseless-cast								\
+		-Wvariadic-macros							\
+		-fcheck-new									\
+		-flto-odr-type-merging						\
+		-fno-omit-frame-pointer						\
+		-fPIE										\
+		-fsized-deallocation						\
+		-fstack-protector							\
+		-fstrict-overflow							\
+		-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
+		

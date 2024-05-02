@@ -4,7 +4,7 @@
 struct Variable
 {
     char* name;
-    int len;
+    size_t len;
 };
 
 #define STACK_T Variable

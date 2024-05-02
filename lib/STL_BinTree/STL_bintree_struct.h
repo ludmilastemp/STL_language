@@ -5,14 +5,14 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 #include <assert.h>
 
 #include "STL_bintree_node_struct.h"
 
 #include "../STL_Onegin/STL_file_open.h"
 
-#include "STACK_FILE_TYPE_Variable.h"
+#include "STACK_FILE_TYPE_variable.h"
 #include "../STL_Stack/generic.h"
 
 #define BIN_TREE_DATA_VALUE_PRINT_SPECIFIER    "%d"
@@ -59,7 +59,7 @@ const char* const keyWords [] = {":)",          // 0
                                  "\\VCEGO_XOROSHEGO", // 36
                                 };
 
-const int      lenKeyWords [] = {2,  3, 3, 8, 6,
+const size_t   lenKeyWords [] = {2,  3, 3, 8, 6,
                                  4,  2, 2, 3, 2,
                                  8, 10, 6, 3, 5,
                                  2,  3, 3, 1, 1,

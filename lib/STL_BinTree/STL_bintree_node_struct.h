@@ -9,6 +9,8 @@ struct NodeBinTreeData
     int variable;  /// номер    переменной
     int function;  /// номер    функции
 
+    bool freeData;
+
     static const int T_VALUE    = 1;
     static const int T_OPCODE   = 2;
     static const int T_VARIABLE = 3;

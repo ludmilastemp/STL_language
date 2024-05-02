@@ -27,7 +27,7 @@ int CompileProgram (BackEndCtx* ctx)
     /**
      *  Compile main
      */
-    fprintf (ctx->fp, "\n:main");
+    fprintf (ctx->fp, ":main");
     fprintf (ctx->fp, "\n$ начало main");
 
     ctx->node = oldNode->left;
@@ -204,7 +204,7 @@ static int CompileVariableBeforeCall (BackEndCtx* ctx)
             fprintf (ctx->fp, " ");
 
         fprintf (ctx->fp, "$ ");
-        for (int j = 0; j < ctx->var->data[i].len; j++)
+        for (size_t j = 0; j < ctx->var->data[i].len; j++)
             fprintf (ctx->fp, "%c", ctx->var->data[i].name[j]);
 
     }
@@ -227,7 +227,7 @@ static int CompileVariableAfterCall (BackEndCtx* ctx)
             fprintf (ctx->fp, " ");
 
         fprintf (ctx->fp, "$ ");
-        for (int j = 0; j < ctx->var->data[i].len; j++)
+        for (size_t j = 0; j < ctx->var->data[i].len; j++)
             fprintf (ctx->fp, "%c", ctx->var->data[i].name[j]);
 
     }
@@ -296,7 +296,7 @@ static int CompilePrintf (BackEndCtx* ctx)
 
     if (CompileExpression (ctx)) return ERROR_IN_CompilePrintf;
 
-    fprintf (ctx->fp, "\n\t\tOUT");
+    fprintf (ctx->fp, "\n\t\tout");
 
     return 0;
 }
@@ -438,7 +438,7 @@ static int CompileAssign (BackEndCtx* ctx)
         fprintf (ctx->fp, " ");
 
     fprintf (ctx->fp, "$ ");
-    for (int j = 0; j < ctx->var->data[oldNode->left->data->variable].len; j++)
+    for (size_t j = 0; j < ctx->var->data[oldNode->left->data->variable].len; j++)
         fprintf (ctx->fp, "%c", ctx->var->data[oldNode->left->data->variable].name[j]);
 
 
@@ -611,6 +611,6 @@ static int CompileExpression (BackEndCtx* ctx)
 static void PrintfVar (BackEndCtx* ctx)
 {
     fprintf (ctx->fp, "$ ");
-    for (int i = 0; i < ctx->var->data[ctx->node->data->variable].len; i++)
+    for (size_t i = 0; i < ctx->var->data[ctx->node->data->variable].len; i++)
     fprintf (ctx->fp, "%c", ctx->var->data[ctx->node->data->variable].name[i]);
 }

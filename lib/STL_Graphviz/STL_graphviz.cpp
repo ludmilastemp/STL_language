@@ -25,13 +25,22 @@ void STL_GraphvizBinTree (BinTree* tree, const int file)
 
     fclose (fp);
 
-    if (file == after_front_end) system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL1.png");
-    if (file == after_back_end)  system ("dot -Tpng .\\temp/STL_graphviz_png.dot -o temp/STL2.png");
+    int a = 0;
+    if (file == after_front_end) a = system ("dot -Tpng temp/STL_graphviz_png.dot -o temp/STL1.png");
+    if (file == after_back_end)  a = system ("dot -Tpng temp/STL_graphviz_png.dot -o temp/STL2.png");
+    a++;
 }
 
 static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_Variable* stk)
 {
-    if (node == nullptr) return;
+    // if (node == nullptr) return;
+
+    if (node == nullptr) 
+    {
+        fprintf (fp, "\nf%d [ label = \"null\" ]\n", *num);
+        (*num)++;
+        return;
+    }
 
     fprintf (fp, "\nf%d", *num);
 
@@ -83,21 +92,19 @@ static void PrintSubtree (FILE* fp, const NodeBinTree* node, int* num)//, Stack_
 
     (*num)++;
 
-    if (node->left != nullptr)
-//    if (node != nullptr)
+    // if (node->left != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->left, num);//, stk);
     }
 
-    if (node->right != nullptr)
-//    if (node != nullptr)
+    // if (node->right != nullptr)
     {
         fprintf (fp, "f%d->f%d \n", curNum, *num);
         PrintSubtree (fp, node->right, num);//, stk);
     }
 
-    (*num)++;
+    // (*num)++;
 }
 
 #undef pr

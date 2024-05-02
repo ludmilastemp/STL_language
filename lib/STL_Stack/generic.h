@@ -1,3 +1,4 @@
+#ifdef STACK_T
 
 #ifndef STACK
 #define CONCAT(arg1, arg2) arg1##arg2
@@ -13,5 +14,7 @@
 #undef STACK
 #undef STACK_T
 #undef STACK_DATA_PRINT_SPECIFIER
+
+#endif /* STACK_T */
 
 

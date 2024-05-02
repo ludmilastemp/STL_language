@@ -7,7 +7,7 @@
 #include <stdarg.h>
 
 #include "STACK_FILE_TYPE_int.h"
-#include "../STL_stack/generic.h"
+#include "../STL_Stack/generic.h"
 #include "include/STL_spu_struct_const.h"
 #include "include/STL_spu_const.h"
 
@@ -25,7 +25,7 @@ struct SPU_Struct
     STL_SpuStructDtor ((stk))
 
 #define SpuStructVerificator(stk)                                   \
-    STL_SpuStructVerificator ((stk))   // вызов dump
+    STL_SpuStructVerificator ((stk))   // пїЅпїЅпїЅпїЅпїЅ dump
 
 #define SpuStructDump(stk)                                          \
     STL_SpuStructDump ((stk))

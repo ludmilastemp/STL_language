@@ -1,6 +1,6 @@
 #include "STL_header.h"
 
-int WriteSignature (const int version, char* str, int* ip)
+int WriteSignature (const int version, char* str, size_t* ip)
 {
     assert (str);
     assert (ip);
@@ -14,7 +14,7 @@ int WriteSignature (const int version, char* str, int* ip)
     return 0;
 }
 
-int CheckFileSignature (const char* const str, int* ip, const int version)
+int CheckFileSignature (const char* const str, size_t* ip, const int version)
 {
     assert (str);
     assert (ip);
