@@ -1,10 +1,12 @@
 #ifndef STACK_FILE_TYPE_Variable_
 #define STACK_FILE_TYPE_Variable_
 
+#include <stdio.h>
+
 struct Variable
 {
     char* name;
-    int len;
+    size_t len; 
 };
 
 #define STACK_T Variable

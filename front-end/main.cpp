@@ -26,21 +26,19 @@ int main (const int argc, const char** argv)
     Stack_NodeBinTreeData token = { 0 };
     StackCtor (&token);
 
-    Stack_Variable func = { 0 };
+    Stack_Function func = { 0 };
     StackCtor (&func);
 
     Stack_Variable var = { 0 };
     StackCtor (&var);
 
     RecursiveDescentCtx ctx = {.str   = tree->buf,
-                               .pos   = 0,
-                               .nFunc = 0,
                                .func  = &func,
                                .var   = &var,
                                .token = &token};
 
     LexicalAnalysis (&ctx);
-
+ 
 //    printf ("COUNT TOKENS = %d\n", (int)token.size); // warning without (int)
 
     for (int i = 0; i < (int)token.size; i++)
@@ -77,42 +75,3 @@ int main (const int argc, const char** argv)
 
     return 0;
 }
-
-//#include <stdio.h>
-//
-//int* p = 0;
-//
-//int Func (int n)
-//{
-//    int k = 0;
-//
-//    printf ("k = [%p]\n", &k);
-//
-//    if (n > 1)
-//    {
-//        k = Func (n - 1);
-//    }
-//    else k = 1;
-//
-//    printf ("k = [%p]\n", &k);
-//    printf ("k = %d\n", k);
-//    printf ("p = [%p]\n", p);
-//    printf ("p = %d\n\n", *p);
-//    printf ("\n");
-//    p = &k;
-//
-//    return k;
-//
-//}
-//
-//
-//int main ()
-//{
-//    int n = 4;
-//
-//    p = &n;
-//
-//    Func (n);
-//
-//    return 0;
-//}

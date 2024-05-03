@@ -13,6 +13,8 @@ front-end: 	front-end/main.cpp 								\
 			temp/stack_node_error.o                     	\
 			temp/stack_var_func.o                      		\
 			temp/stack_var_error.o                     		\
+			temp/stack_func_func.o                     		\
+			temp/stack_func_error.o                    		\
 
 	g++ front-end/main.cpp									\
 		front-end/RecRead.cpp								\
@@ -23,6 +25,8 @@ front-end: 	front-end/main.cpp 								\
 		temp/stack_node_error.o                     		\
 		temp/stack_var_func.o                      			\
 		temp/stack_var_error.o                     			\
+		temp/stack_func_func.o                     			\
+		temp/stack_func_error.o                    			\
 		$(FLAGS)											\
 		-o front-end.exe
 

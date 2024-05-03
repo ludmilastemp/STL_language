@@ -30,6 +30,8 @@ int CompileProgram (BackEndCtx* ctx)
     fprintf (ctx->fp, ":main");
     fprintf (ctx->fp, "\n$ начало main");
 
+    fprintf (ctx->fp, "\n\t\tpush 0\n\t\tpop rbp");
+
     ctx->node = oldNode->left;
     CompileMultipleOperations (ctx);
 
@@ -154,7 +156,7 @@ static int CompileFormalArguments (BackEndCtx* ctx)
         ctx->node->data->type != NodeBinTreeData::T_VARIABLE)
         return ERROR_IN_CompileArguments;
 
-    int n = fprintf (ctx->fp, "\n\t\tpop [%d]", ctx->node->data->variable);
+    int n = fprintf (ctx->fp, "\n\t\tpop [%d rbp]", ctx->node->data->variable);
 
     for (int j = 0; j < nSpace - n; j++)
         fprintf (ctx->fp, " ");
@@ -198,7 +200,7 @@ static int CompileVariableBeforeCall (BackEndCtx* ctx)
 
     for (int i = ctx->nVarBefore; i <= ctx->nVarInFunc; i++)
     {
-        int n = fprintf (ctx->fp, "\n\t\tpush [%d]", i);
+        int n = fprintf (ctx->fp, "\n\t\tpush [%d rbp]", i);
 
         for (int j = 0; j < nSpace - n; j++)
             fprintf (ctx->fp, " ");
@@ -221,7 +223,7 @@ static int CompileVariableAfterCall (BackEndCtx* ctx)
 
     for (int i = ctx->nVarInFunc; i >= ctx->nVarBefore; i--)
     {
-        int n = fprintf (ctx->fp, "\n\t\tpop [%d]", i);
+        int n = fprintf (ctx->fp, "\n\t\tpop [%d rbp]", i);
 
         for (int j = 0; j < nSpace - n; j++)
             fprintf (ctx->fp, " ");
@@ -432,7 +434,7 @@ static int CompileAssign (BackEndCtx* ctx)
 
     printf ("I in CompileAssign after right\n");
 
-    int n = fprintf (ctx->fp, "\n\t\tpop [%d]", oldNode->left->data->variable);
+    int n = fprintf (ctx->fp, "\n\t\tpop [%d rbp]", oldNode->left->data->variable);
 
     for (int j = 0; j < nSpace - n; j++)
         fprintf (ctx->fp, " ");
@@ -508,7 +510,7 @@ static int CompileExpression (BackEndCtx* ctx)
         case NodeBinTreeData::T_VARIABLE:
 
             {
-            int n = fprintf (ctx->fp, "\n\t\tpush [%d]", ctx->node->data->variable);
+            int n = fprintf (ctx->fp, "\n\t\tpush [%d rbp]", ctx->node->data->variable);
 
             for (int j = 0; j < nSpace - n; j++)
                 fprintf (ctx->fp, " ");

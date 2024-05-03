@@ -44,7 +44,6 @@ static void LexicalAnalysisPass  (RecursiveDescentCtx* ctx);
 static void SkipSpaces           (RecursiveDescentCtx* ctx);
 static size_t FindFunction       (RecursiveDescentCtx* ctx);
 static size_t FindVariable       (RecursiveDescentCtx* ctx);
-static size_t FindName           (RecursiveDescentCtx* ctx, Stack_Variable* stk);
 static size_t StrlenName         (const char* const buf);
 
 static int  NodeDataType         (RecursiveDescentCtx* ctx);
@@ -63,7 +62,8 @@ NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx)
 {
     if (ctx == nullptr) return nullptr;
 
-    ctx->pos = 0;
+    ctx->pos  = 0;
+    ctx->nVar = 0;
 
     NodeBinTree* node = NODE_CTOR (NodeData (ctx), nullptr, nullptr);
     if (!node) return NoMemoryError();
@@ -93,6 +93,7 @@ NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx)
 
     while (ctx->pos < ctx->token->size)
     {
+        ctx->nFunc++;
         node1->right = GetFunction (ctx);
         node1 = node1->right;
 
@@ -138,6 +139,8 @@ static NodeBinTree* GetFunction (RecursiveDescentCtx* ctx)
         ctx->pos--;
         node1 = NODE_CTOR (NodeData (ctx), node1, nullptr);
         if (!node1) return NoMemoryError();
+        // node1 = NODE_CTOR (NodeData (ctx), node1, nullptr);
+        // if (!node1) return NoMemoryError();
         ctx->pos++;
     }
 
@@ -161,9 +164,41 @@ static NodeBinTree* GetFunction (RecursiveDescentCtx* ctx)
         /**
          * for standart
          */
-         node->left        = node1;
+         node->left              = node1;
+        //  node->left->left->right = node->right;
          node->left->right = node->right;
-         node->right       = nullptr;
+         node->right             = nullptr;
+    }
+
+    {
+        /**
+         * Get variables name
+         */
+        // NodeBinTreeData* nodeTmp = (NodeBinTreeData*) 
+        //     calloc (ctx->var->size, sizeof (NodeBinTreeData));
+        // assert (nodeTmp);
+        
+// struct NodeBinTreeData
+// {
+//     int type;      /// тип
+//     int value;     /// значение если число
+//     int opCode;    /// код      если ключевое слово
+//     int variable;  /// номер    переменной
+//     int function;  /// номер    функции
+
+//     bool freeData;
+
+//     static const int T_VALUE    = 1;
+//     static const int T_OPCODE   = 2;
+//     static const int T_VARIABLE = 3;
+//     static const int T_FUNCTION = 4;
+
+//     static const int TYPE_POISON     = 0;
+//     static const int VALUE_POISON    = 0;
+//     static const int OPCODE_POISON   = -1;
+//     static const int VARIABLE_POISON = -1;
+//     static const int FUNCTION_POISON = -1;
+// };
     }
 
     return node;
@@ -943,7 +978,7 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
             data.type     = NodeBinTreeData::T_FUNCTION;
             data.function = (int)FindFunction (ctx);
 
-            StackPush (ctx->token, data);
+            StackPush (ctx->token, data); 
             return;
         }
     }
@@ -965,34 +1000,18 @@ LexicalAnalysisPass (RecursiveDescentCtx* ctx)
     return;
 }
 
-static size_t
-FindVariable (RecursiveDescentCtx* ctx)
-{
-    assert (ctx);
-
-    return FindName (ctx, ctx->var);
-}
-
+/// функция поиска переменной или функции по имени
 static size_t
 FindFunction (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
-
-    return FindName (ctx, ctx->func);
-}
-
-/// функция поиска переменной или функции по имени
-static size_t
-FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
-{
-    assert (ctx);
-                       /// no var
+                     
     size_t nameLen = StrlenName (ctx->str + ctx->pos);
 
     size_t elem = 0;
-    for (; elem < stk->size; elem++)
+    for (; elem < ctx->func->size; elem++)
     {
-        if (strncmp (stk->data[elem].name, ctx->str + ctx->pos, nameLen) == 0)
+        if (strncmp (ctx->func->data[elem].name, ctx->str + ctx->pos, nameLen) == 0)
         {
             ctx->pos += nameLen;
 
@@ -1000,13 +1019,41 @@ FindName (RecursiveDescentCtx* ctx, Stack_Variable* stk)
         }
     }
 
-    Variable data = { .name = ctx->str + ctx->pos, .len = nameLen };
+    Function data = { .name = ctx->str + ctx->pos, .len = nameLen };
 
-    StackPush (stk, data);
-
+    StackPush (ctx->func, data);
+    
     ctx->pos += nameLen;
 
     return elem;
+}
+
+/// функция поиска переменной или функции по имени
+static size_t
+FindVariable (RecursiveDescentCtx* ctx)
+{
+    assert (ctx);
+                       
+    size_t nameLen = StrlenName (ctx->str + ctx->pos);
+
+    size_t elem = ctx->nVar;
+    for (; elem < ctx->var->size; elem++)
+    {
+        if (strncmp (ctx->var->data[elem].name, ctx->str + ctx->pos, nameLen) == 0)
+        {
+            ctx->pos += nameLen;
+
+            return elem;// - ctx->nVar;
+        }
+    }
+
+    Variable data = { .name = ctx->str + ctx->pos, .len = nameLen };
+
+    StackPush (ctx->var, data);
+
+    ctx->pos += nameLen;
+
+    return elem;// - ctx->nVar;
 }
 
 /// так как после переменной может не быть пробела,
@@ -1053,7 +1100,8 @@ SkipSpaces (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
 
-    while (isspace (ctx->str[ctx->pos])) ctx->pos++;
+    while (ctx->str[ctx->pos] != EOF &&
+           isspace (ctx->str[ctx->pos])) ctx->pos++;
 
     /// TO DO это все должно быть в отдельной функции
 //    static int lastMAGIC = 0; // move it from this place enable/disable
@@ -1069,7 +1117,7 @@ SkipSpaces (RecursiveDescentCtx* ctx)
 //        return;
 //    }
 
-    while (isspace (ctx->str[ctx->pos])) ctx->pos++;
+    // while (isspace (ctx->str[ctx->pos])) ctx->pos++;
 }
 
     // in BinTreeStruct.cpp - ?

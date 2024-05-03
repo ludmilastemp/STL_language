@@ -14,4 +14,4 @@ DEF_REG (rcx, 4)
 
 DEF_REG (rdx, 5)
 
-DEF_REG (rex, 6)
+DEF_REG (rbp, 6)

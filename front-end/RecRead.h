@@ -14,17 +14,19 @@
 #include "../lib/STL_Stack/generic.h"
 #include "STACK_FILE_TYPE_variable.h"
 #include "../lib/STL_Stack/generic.h"
+#include "STACK_FILE_TYPE_function.h"
+#include "../lib/STL_Stack/generic.h"
 
 const char MAGIC[] = "meow";
 const int  IHavePawsPeriod = 150;
 
 struct RecursiveDescentCtx
 {
-    char* str;
+    char*  str;
     size_t pos;
-    int   nFunc;
-    int   nVarInMain;
-    Stack_Variable* func;
+    int    nFunc;
+    size_t nVar;
+    Stack_Function* func;
     Stack_Variable* var;
     Stack_NodeBinTreeData* token;
 };
