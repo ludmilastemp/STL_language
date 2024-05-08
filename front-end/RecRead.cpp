@@ -1,5 +1,7 @@
 #include "RecRead.h"
 
+#define $printf(...)
+
 /// TO DO: встретилось это, а ожидалось это
 /// начать чекать тип
 
@@ -84,9 +86,9 @@ NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx)
 
 //    for (int i = 0; i < ctx->func->size; i++)
 //    {
-//        printf ("size = %d\n", i);
+//        $printf ("size = %d\n", i);
 //        for (int j = 0; j < ctx->func->data[i].len; j++)
-//            printf ("name = %c\n", ctx->func->data[i].name[j]);
+//            $printf ("name = %c\n", ctx->func->data[i].name[j]);
 //    }
 
     NodeBinTree* node1 = node;
@@ -102,9 +104,9 @@ NodeBinTree* ParseProgram (RecursiveDescentCtx* ctx)
 
     for (size_t i = 0; i < ctx->func->size; i++)
     {
-        printf ("\n\nsize = %lu\n name = ", i);
+        $printf ("\n\nsize = %lu\n name = ", i);
         for (size_t j = 0; j < ctx->func->data[i].len; j++)
-            printf ("%c", ctx->func->data[i].name[j]);
+            $printf ("%c", ctx->func->data[i].name[j]);
     }
 
     return node;
@@ -521,7 +523,7 @@ static NodeBinTree* GetConditionOp (RecursiveDescentCtx* ctx)
      * ConditionOp  := Cond ['<=>' '<?=?>'] Body
      */
     assert (ctx);
-//    printf ("I in GetConditionOp\n"
+//    $printf ("I in GetConditionOp\n"
 //            "\tpos = %d\n", ctx->pos);
 
     size_t oldPos = ctx->pos;
@@ -575,7 +577,7 @@ static NodeBinTree* GetCondition (RecursiveDescentCtx* ctx)
      *       {['>=' '<=' '>' '<' '==' '!=']}  Eval '\katapanma'
      */
     assert (ctx);
-//    printf ("I in GetCondition\n");
+//    $printf ("I in GetCondition\n");
 
     size_t oldPos = ctx->pos;
     NodeBinTree* node  = nullptr;
@@ -906,10 +908,10 @@ static void // в отдельный файл
 LexicalAnalysisPass (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
-//    printf ("\n\nbegin LexicalAnalysisPass"
+//    $printf ("\n\nbegin LexicalAnalysisPass"
 //            "\n\tsize = %d", ctx->token->size);
-//    printf ("\n\tpos  = %d", ctx->pos);
-//    printf ("\n\tstr  = %d", ctx->str[ctx->pos]);
+//    $printf ("\n\tpos  = %d", ctx->pos);
+//    $printf ("\n\tstr  = %d", ctx->str[ctx->pos]);
 //
 //    if (ctx->token->size >= 60) assert (false);
 
@@ -1100,7 +1102,7 @@ SkipSpaces (RecursiveDescentCtx* ctx)
 {
     assert (ctx);
 
-    while (ctx->str[ctx->pos] != EOF &&
+    while (ctx->str[ctx->pos] != '\0' && ctx->str[ctx->pos] != EOF &&
            isspace (ctx->str[ctx->pos])) ctx->pos++;
 
     /// TO DO это все должно быть в отдельной функции
@@ -1113,7 +1115,7 @@ SkipSpaces (RecursiveDescentCtx* ctx)
 //    }
 //    else if (lastMAGIC++ == IHavePawsPeriod)
 //    {
-//        printf ("\n\n\nI have paws! I don't want to work!!!\n\n");
+//        $printf ("\n\n\nI have paws! I don't want to work!!!\n\n");
 //        return;
 //    }
 
@@ -1164,3 +1166,5 @@ static NodeBinTree* NotThisFunc (RecursiveDescentCtx* ctx,
     ctx->pos = pos;
     return nullptr;
 }
+
+#undef $printf

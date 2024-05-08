@@ -147,8 +147,6 @@ static int CompileOperation (const char* string,
     assert (labels);
     assert (fixups);
 
-    printf ("first symbol = %d %c\n", string[0], string[0]);
-
     string += SkipWhitespaces (string);
     if    (string[0] == 0)    return 0;
     if    (string[0] == '\n') return 0;

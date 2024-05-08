@@ -41,21 +41,21 @@ int main (const int argc, const char** argv)
  
 //    printf ("COUNT TOKENS = %d\n", (int)token.size); // warning without (int)
 
-    for (int i = 0; i < (int)token.size; i++)
-    {
-        printf ("\ni = %d"
-                "\n\ttype     = %d"
-                "\n\tvalue    = %d"
-                "\n\topCode   = %d"
-                "\n\tfunction = %d"
-                "\n\tvariable = %d\n",
-                 i,
-                 token.data[i].type,
-                 token.data[i].value,
-                 token.data[i].opCode,
-                 token.data[i].function,
-                 token.data[i].variable);
-    }
+    // for (int i = 0; i < (int)token.size; i++)
+    // {
+    //     printf ("\ni = %d"
+    //             "\n\ttype     = %d"
+    //             "\n\tvalue    = %d"
+    //             "\n\topCode   = %d"
+    //             "\n\tfunction = %d"
+    //             "\n\tvariable = %d\n",
+    //              i,
+    //              token.data[i].type,
+    //              token.data[i].value,
+    //              token.data[i].opCode,
+    //              token.data[i].function,
+    //              token.data[i].variable);
+    // }
 
     tree->root = ParseProgram (&ctx);
     tree->var  = &var;

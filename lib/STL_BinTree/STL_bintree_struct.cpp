@@ -434,7 +434,7 @@ ReadDataNodeBinTree (char* const buf, size_t* len, Stack_Variable* var)
 
     if (data->variable != NodeBinTreeData::VARIABLE_POISON)
     {
-        printf ("TES\n");
+        // printf ("TES\n");
 
         Variable var1 = { .name = 0, .len = 0 };
 
@@ -446,8 +446,8 @@ ReadDataNodeBinTree (char* const buf, size_t* len, Stack_Variable* var)
         var1.name = buf + *len;
         var1.len  = a;
 
-        for (size_t i = 0; i < var1.len; i++)
-            printf ("~%c~", var1.name[i]);
+        // for (size_t i = 0; i < var1.len; i++)
+        //     printf ("~%c~", var1.name[i]);
 
         data->variable = (int)FindName (var1, var);
 
@@ -493,7 +493,7 @@ FindName (Variable var1, Stack_Variable* var)
     {
         if (strncmp (var->data[elem].name, var1.name, var1.len) == 0)
         {
-            printf ("%lu\n", var1.len);
+            // printf ("%lu\n", var1.len);
             return elem;
         }
     }

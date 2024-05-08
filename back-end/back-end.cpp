@@ -1,5 +1,7 @@
 #include "back-end.h"
 
+#define $printf(...)
+
 static int CompileMultipleOperations (BackEndCtx* ctx);
 static int CompileOperation          (BackEndCtx* ctx);
 static int CompileActualArguments    (BackEndCtx* ctx);
@@ -45,7 +47,7 @@ int CompileProgram (BackEndCtx* ctx)
      */
     while (oldNode != nullptr)
     {
-        printf ("\n\n\n\nFUNCTION N = %d\n\n\n\n", oldNode->data->function);
+        $printf ("\n\n\n\nFUNCTION N = %d\n\n\n\n", oldNode->data->function);
 
         ctx->nVarBefore = ctx->nVarInFunc + 1;
 
@@ -103,7 +105,7 @@ static int CompileMultipleOperations (BackEndCtx* ctx)
 static int CompileOperation (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("\n\nI in CompileOperation\n");
+    $printf ("\n\nI in CompileOperation\n");
 
     if (CompileFunction    (ctx) &&
         CompileFuncReturn  (ctx) &&
@@ -128,7 +130,7 @@ static int CompileOperation (BackEndCtx* ctx)
         return ERROR_IN_CompileOperation;
     }
 
-//    printf ("I end CompileOperation\n\n\n");
+   $printf ("I end CompileOperation\n\n\n");
 
     return 0;
 }
@@ -136,7 +138,7 @@ static int CompileOperation (BackEndCtx* ctx)
 static int CompileFormalArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileFormalArguments\n");
+    $printf ("I in CompileFormalArguments\n");
 
     if (ctx->node               == nullptr ||
         ctx->node->data->opCode != END_OPERATION)
@@ -168,7 +170,7 @@ static int CompileFormalArguments (BackEndCtx* ctx)
 static int CompileActualArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileActualArguments\n");
+    $printf ("I in CompileActualArguments\n");
 
     NodeBinTree* oldNode = nullptr;
 
@@ -196,7 +198,7 @@ static int CompileActualArguments (BackEndCtx* ctx)
 static int CompileVariableBeforeCall (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileVariableBeforeCall\n");
+    $printf ("I in CompileVariableBeforeCall\n");
 
     for (int i = ctx->nVarBefore; i <= ctx->nVarInFunc; i++)
     {
@@ -219,7 +221,7 @@ static int CompileVariableBeforeCall (BackEndCtx* ctx)
 static int CompileVariableAfterCall (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileVariableAfterCall\n");
+    $printf ("I in CompileVariableAfterCall\n");
 
     for (int i = ctx->nVarInFunc; i >= ctx->nVarBefore; i--)
     {
@@ -242,7 +244,7 @@ static int CompileVariableAfterCall (BackEndCtx* ctx)
 static int CompileFunction (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileFunction\n");
+    $printf ("I in CompileFunction\n");
 
     if (ctx->node->data->type != NodeBinTreeData::T_FUNCTION)
         return ERROR_IN_CompileFunction;
@@ -267,7 +269,7 @@ static int CompileFunction (BackEndCtx* ctx)
 static int CompileFuncReturn (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileFuncReturn\n");
+    $printf ("I in CompileFuncReturn\n");
 
     if (ctx->node->data->opCode != FUNC_RETURN)
         return ERROR_IN_CompileFuncReturn;
@@ -289,7 +291,7 @@ static int CompileFuncReturn (BackEndCtx* ctx)
 static int CompilePrintf (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompilePrintf\n");
+    $printf ("I in CompilePrintf\n");
 
     if (ctx->node->data->opCode != PRINTF)
         return ERROR_IN_CompilePrintf;
@@ -306,7 +308,7 @@ static int CompilePrintf (BackEndCtx* ctx)
 static int CompileConditionOp (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileConditionOp\n");
+    $printf ("I in CompileConditionOp\n");
 
     if (     ctx->node->data->opCode == IF)
         fprintf (ctx->fp, "\n\n:if_%d_condition", ctx->nIf);
@@ -419,7 +421,7 @@ static int CompileConditionOp (BackEndCtx* ctx)
 static int CompileAssign (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileAssign\n");
+    $printf ("I in CompileAssign\n");
 
     if (ctx->node      ->data->opCode   != ASSING ||
         ctx->node->left->data->variable == NodeBinTreeData::VARIABLE_POISON)
@@ -427,12 +429,12 @@ static int CompileAssign (BackEndCtx* ctx)
 
     NodeBinTree* oldNode = ctx->node;
 
-    printf ("I in CompileAssign before right\n");
+    $printf ("I in CompileAssign before right\n");
 
     ctx->node = oldNode->right;
     CompileExpression (ctx);
 
-    printf ("I in CompileAssign after right\n");
+    $printf ("I in CompileAssign after right\n");
 
     int n = fprintf (ctx->fp, "\n\t\tpop [%d rbp]", oldNode->left->data->variable);
 
@@ -449,14 +451,14 @@ static int CompileAssign (BackEndCtx* ctx)
 
     ctx->node = oldNode;
 
-    printf ("I end CompileAssign\n");
+    $printf ("I end CompileAssign\n");
     return 0;
 }
 
 static int CompileCreate (BackEndCtx* ctx)
 {
     assert (ctx);
-    printf ("I in CompileCreate\n");
+    $printf ("I in CompileCreate\n");
 
     if (ctx->node->data->opCode != T_INT)
         return ERROR_IN_CompileCreate;
@@ -470,7 +472,7 @@ static int CompileExpression (BackEndCtx* ctx)
 
     if (ctx->node->data->type == NodeBinTreeData::T_FUNCTION)
     {
-//        printf ("BEFORE CompileFunction in if\n\n");
+       $printf ("BEFORE CompileFunction in if\n\n");
 
         CompileFunction (ctx);
 
@@ -525,7 +527,7 @@ static int CompileExpression (BackEndCtx* ctx)
 
         case NodeBinTreeData::T_FUNCTION:
 
-            printf ("BEFORE CompileFunction\n\n");
+            $printf ("BEFORE CompileFunction\n\n");
             CompileFunction (ctx);
             fprintf (ctx->fp, "\n\t\tpush rax");
 
