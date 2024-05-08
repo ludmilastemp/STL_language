@@ -30,7 +30,6 @@ front-end: 	front-end/main.cpp 								\
 		$(FLAGS)											\
 		-o front-end.exe
 
-
 back-end: 	back-end/main.cpp 								\
 			back-end/back-end.h  							\
 			back-end/back-end.cpp							\
@@ -55,62 +54,15 @@ back-end: 	back-end/main.cpp 								\
 		$(FLAGS)											\
 		-o back-end.exe
 
-compile: 	lib/STL_Asm/main.cpp 							\
-			lib/STL_Asm/STL_compile.h 						\
-			lib/STL_Asm/STL_compile.cpp 					\
-			lib/STL_Asm/STL_label.h        					\
-			lib/STL_Asm/STL_label.cpp   					\
-			lib/STL_Asm/STL_label_struct.h 					\
-			lib/STL_Spu/include/STL_spu_struct_const.h  	\
-			lib/STL_Spu/include/STL_spu_struct_const.cpp	\
-			lib/STL_Onegin/STL_string.h                 	\
-			lib/STL_Onegin/STL_header.h						\
-			lib/STL_Onegin/STL_header.cpp					\
-			lib/STL_Onegin/STL_file_open.h 					\
-			lib/STL_Onegin/STL_file_open.cpp				\
-			temp/stack_label_func.o                      	\
-			temp/stack_label_error.o                    	\
-			temp/stack_fixup_func.o                      	\
-			temp/stack_fixup_error.o                     	\
+execute: 	execute/main.cpp								\
+			execute/asm.o
+	g++ execute/main.cpp 									\
+		execute/asm.o 										\
+		$(FLAGS) 											\
+		-o execute.exe
 
-	g++ lib/STL_Asm/main.cpp 								\
-		lib/STL_Asm/STL_compile.cpp 						\
-		lib/STL_Asm/STL_label.cpp 							\
-		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
-		lib/STL_Onegin/STL_header.cpp						\
-		lib/STL_Onegin/STL_file_open.cpp					\
-		temp/stack_label_func.o                      		\
-		temp/stack_label_error.o                     		\
-		temp/stack_fixup_func.o                      		\
-		temp/stack_fixup_error.o                     		\
-		$(FLAGS)											\
-		-o compile.exe
-
-spu:    	lib/STL_Spu/main.cpp 							\
-			lib/STL_Spu/STL_spu.h   						\
-			lib/STL_Spu/STL_spu.cpp 						\
-			lib/STL_Spu/STL_spu_struct.h 					\
-			lib/STL_Spu/STL_spu_struct.cpp 					\
-			lib/STL_Spu/include/STL_spu_struct_const.h      \
-			lib/STL_Spu/include/STL_spu_struct_const.cpp    \
-			lib/STL_Onegin/STL_string.h                     \
-			lib/STL_Onegin/STL_file_open.h 					\
-			lib/STL_Onegin/STL_file_open.cpp				\
-			lib/STL_Onegin/STL_header.h						\
-			lib/STL_Onegin/STL_header.cpp					\
-			temp/stack_int_func.o 							\
-			temp/stack_int_error.o 							\
-
-	g++ lib/STL_Spu/main.cpp 								\
-		lib/STL_Spu/STL_spu.cpp 							\
-		lib/STL_Spu/STL_spu_struct.cpp 						\
-		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
-		lib/STL_Onegin/STL_file_open.cpp					\
-		lib/STL_Onegin/STL_header.cpp						\
-		temp/stack_int_func.o 								\
-		temp/stack_int_error.o 								\
-		$(FLAGS)											\
-		-o spu.exe
+execute/asm.o: examples/1asm.asm
+	nasm -f elf64 examples/1asm.asm -o execute/asm.o
 
 .PHONY: front-end back-end compile spu clean
 

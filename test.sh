@@ -1,5 +1,5 @@
 
 ./front-end.exe
 ./back-end.exe
-./compile.exe
-./spu.exe
+make execute
+./execute.exe

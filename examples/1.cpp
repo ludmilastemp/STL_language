@@ -24,7 +24,7 @@
 
 \VCEGO_XOROSHEGO
 
-    \gravo no :)
+=^.    \gravo no :)     .^=
 
     no ::= :( Factorial >|< no ): :)
 
@@ -52,4 +52,3 @@
 
 
 \lemma :( Factorial >|< k ):
-

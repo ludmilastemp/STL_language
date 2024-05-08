@@ -16,6 +16,8 @@ enum ErrorInFunction
     ERROR_IN_CompileCreate              = 9,
 };
 
+const int variableSize = 8;
+
 struct BackEndCtx
 {
     NodeBinTree* node;
@@ -23,6 +25,7 @@ struct BackEndCtx
     Stack_Variable* var;
     int nIf;
     int nWhile;
+    int tempVar;
     int nVarInFunc;
     int nVarBefore;
 };
