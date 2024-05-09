@@ -22,13 +22,13 @@ int CompileProgram (BackEndCtx* ctx)
 {
     assert (ctx);
 
-    ctx->tempVar = 0;
+    ctx->tempVar    = 1;
+    ctx->nVarInFunc = 0;
     NodeBinTree* oldNode = ctx->node;
 
     fprintf (ctx->fp, "\nglobal Func");
+    fprintf (ctx->fp, "\nextern MySqrt");
     fprintf (ctx->fp, "\n\nsection .data");
-    fprintf (ctx->fp, "\nvariable: db 512 DUP (0)");
-    fprintf (ctx->fp, "\nendStack: db 1");
     fprintf (ctx->fp, "\n\nsection .text");
 
     /**
@@ -36,14 +36,11 @@ int CompileProgram (BackEndCtx* ctx)
      */
     fprintf (ctx->fp, "\n; начало main");
     fprintf (ctx->fp, "\n\nFunc:");
-    fprintf (ctx->fp, "\n\n\t\tmov     rdi, variable");
-    fprintf (ctx->fp, "\n\t\tadd     rdi, 64");
+    fprintf (ctx->fp, "\n\n\t\tmov     rbp, rsp");
 
     ctx->node = oldNode->left;
     CompileMultipleOperations (ctx);
         
-    fprintf (ctx->fp, "\n\n\t\txor     rax, rax");
-    fprintf (ctx->fp, "\n\t\tmov     rax, [rdi]");
     fprintf (ctx->fp, "\n\n\t\tret");
     fprintf (ctx->fp, "\n\n; конец main");
 
@@ -53,13 +50,13 @@ int CompileProgram (BackEndCtx* ctx)
     oldNode = oldNode->right;
     while (oldNode != nullptr)
     {
-        $printf ("\n\n\n\nFUNCTION N = %d\n\n\n\n", oldNode->data->function);
+        ctx->nVarInFunc = 0;
 
-    //     ctx->nVarBefore = ctx->nVarInFunc + 1;
+        $printf ("\n\n\n\nFUNCTION N = %d\n\n\n\n", oldNode->data->function);
 
         fprintf (ctx->fp, "\n\n\n\n\n; начало функции");
         fprintf (ctx->fp, "\n\nFunc_%d_:", oldNode->data->function);
-        fprintf (ctx->fp, "\n\n\t\tadd     rdi, 64\n\n");
+        fprintf (ctx->fp, "\n\n\t\tmov     rbp, rsp\n\n");
 
     /**
      *  Compile arguments
@@ -126,7 +123,7 @@ static int CompileOperation (BackEndCtx* ctx)
     $printf ("\n\nI in CompileOperation\n");
 
     fprintf (ctx->fp, "\n\n\n;-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\n");
-
+    // fprintf (ctx->fp, "\n;nVar = %d\n\n", ctx->nVarInFunc);
     if (
         CompileFunction    (ctx) &&
         CompileFuncReturn  (ctx) &&
@@ -138,8 +135,9 @@ static int CompileOperation (BackEndCtx* ctx)
 
     {
         printf ("\nERROR in CompileOperation!!!\n\n");
+        fprintf (ctx->fp, "\n\nERROR in CompileOperation!!!\n\n");
 
-        $printf ("\n\ttype     = %d\
+        printf ("\n\ttype     = %d\
                  \n\tvalue    = %d\
                  \n\topCode   = %d\
                  \n\tvariable = %d\
@@ -149,6 +147,7 @@ static int CompileOperation (BackEndCtx* ctx)
                  ctx->node->data->opCode,
                  ctx->node->data->variable,
                  ctx->node->data->function);
+
         return ERROR_IN_CompileOperation;
     }
 
@@ -169,13 +168,19 @@ static int CompileFunction (BackEndCtx* ctx)
 
     int nFunc = ctx->node->data->function;
 
+    fprintf (ctx->fp, "\n\n\t\t; сохраняем локальные перменные");
+    fprintf (ctx->fp, "\n\t\tsub     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize); 
+
     fprintf (ctx->fp, "\n\t\t; передаем аргументы");
     CompileActualArguments (ctx);
 
     fprintf (ctx->fp, "\n\t\t; Вызов функции");
-    fprintf (ctx->fp, "\n\t\tpush    rdi");
+    fprintf (ctx->fp, "\n\t\tpush    rbp");
     fprintf (ctx->fp, "\n\n\t\tcall Func_%d_\n", nFunc);
-    fprintf (ctx->fp, "\n\t\tpop     rdi\n\n");
+    fprintf (ctx->fp, "\n\t\tpop     rbp\n\n");
+
+    fprintf (ctx->fp, "\n\n\t\t; возвращаем rsp");
+    fprintf (ctx->fp, "\n\t\tadd     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);
 
     return 0;
 }
@@ -195,8 +200,8 @@ static int CompileFuncReturn (BackEndCtx* ctx)
 
         fprintf (ctx->fp, "\n\t\t; значениe return");
         fprintf (ctx->fp, "\n\t\txor     rax, rax");
-        fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]", 
-                 ctx->tempVar * variableSize);
+        fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+                 (ctx->tempVar + ctx->nVarInFunc) * variableSize);
         ctx->tempVar--;
     }
 
@@ -230,7 +235,10 @@ static int CompileFormalArguments (BackEndCtx* ctx)
         return ERROR_IN_CompileArguments;
 
     fprintf (ctx->fp, "\n\t\tpop     rax");
-    fprintf (ctx->fp, "\n\t\tmov     -%d[rdi], rax", ctx->node->data->variable * variableSize);
+    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax", (ctx->node->data->variable + 1) * variableSize);
+
+    if (ctx->node->data->variable >= ctx->nVarInFunc)
+        ctx->nVarInFunc = ctx->node->data->variable;
 
     return 0;
 }
@@ -256,8 +264,8 @@ static int CompileActualArguments (BackEndCtx* ctx)
             return ERROR_IN_CompileFunction;
 
         fprintf (ctx->fp, "\n\t\txor     rax, rax");
-        fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]", 
-                 ctx->tempVar * variableSize);
+        fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+                 (ctx->tempVar + ctx->nVarInFunc) * variableSize);
         fprintf (ctx->fp, "\n\t\tpush    rax");
         ctx->tempVar--;
 
@@ -291,16 +299,16 @@ static int CompileAssign (BackEndCtx* ctx)
 
     $printf ("I in CompileAssign after right\n");
 
-    fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]", 
-             ctx->tempVar * variableSize);
+    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+             (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
     ctx->tempVar--;
 
-    fprintf (ctx->fp, "\n\t\tmov     -%d[rdi], rax", 
-             oldNode->left->data->variable * variableSize);
+    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax", 
+             (oldNode->left->data->variable + 1) * variableSize);
 
-    // if (oldNode->left->data->variable > ctx->nVarInFunc)
-    //     ctx->nVarInFunc = oldNode->left->data->variable;
+    if (ctx->node->data->variable >= ctx->nVarInFunc)
+        ctx->nVarInFunc = ctx->node->data->variable;
 
     ctx->node = oldNode;
 
@@ -357,10 +365,10 @@ static int CompileConditionOp (BackEndCtx* ctx)
     ctx->node = oldNode->left->right;
     CompileExpression (ctx);
 
-    fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]", 
-             (ctx->tempVar - 1)  * variableSize);
-    fprintf (ctx->fp, "\n\t\tmov     rbx, %d[rdi]", 
-             ctx->tempVar * variableSize);
+    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+             ((ctx->tempVar + ctx->nVarInFunc) - 1)  * variableSize);
+    fprintf (ctx->fp, "\n\t\tmov     rbx, -%d[rbp]", 
+             (ctx->tempVar + ctx->nVarInFunc) * variableSize);
     fprintf (ctx->fp, "\n\t\tcmp    rax, rbx\n");
 
     ctx->tempVar--;
@@ -472,8 +480,8 @@ static int CompileExpression (BackEndCtx* ctx)
 
         fprintf (ctx->fp, "\n\t\t; Значение return");
         ctx->tempVar++;
-        fprintf (ctx->fp, "\n\t\tmov     %d[rdi], rax\n", 
-                ctx->tempVar * variableSize);
+        fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
         return 0;
     }
@@ -501,11 +509,11 @@ static int CompileExpression (BackEndCtx* ctx)
     {
         case NodeBinTreeData::T_VALUE:
 
-            fprintf (ctx->fp, "\n\n\t\t        ; variableSize %d ", ctx->node->data->value);
+            fprintf (ctx->fp, "\n\n\t\t        ; const %d ", ctx->node->data->value);
 
             ctx->tempVar++;
-            fprintf (ctx->fp, "\n\t\tmov     qword %d[rdi], %d\n", 
-                    ctx->tempVar * variableSize,
+            fprintf (ctx->fp, "\n\t\tmov     qword -%d[rbp], %d\n", 
+                    (ctx->tempVar + ctx->nVarInFunc) * variableSize,
                     ctx->node->data->value);
 
             break;
@@ -517,16 +525,12 @@ static int CompileExpression (BackEndCtx* ctx)
                 fprintf (ctx->fp, "%c", ctx->var->data[ctx->node->data->variable].name[i]);
 
             ctx->tempVar++;
-            fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rdi]", 
-                    ctx->node->data->variable * variableSize);
-            fprintf (ctx->fp, "\n\t\tmov     %d[rdi], rax\n", 
-                    ctx->tempVar * variableSize);
+            fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+                    (ctx->node->data->variable + 1) * variableSize);
+            fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                    (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
             // PrintfVar (ctx);
-
-            // if (ctx->node->data->variable > ctx->nVarInFunc)
-            //     ctx->nVarInFunc = ctx->node->data->variable;
-            // 
 
             break;
 
@@ -536,59 +540,88 @@ static int CompileExpression (BackEndCtx* ctx)
             {
                 case ADD:
                         
-                    fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]", 
-                             (ctx->tempVar - 1) * variableSize);
-                    fprintf (ctx->fp, "\n\t\tmov     rbx, %d[rdi]", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]", 
+                             ((ctx->tempVar + ctx->nVarInFunc) - 1) * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rbx, -%d[rbp]", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     ctx->tempVar--;
 
-                    fprintf (ctx->fp, "\n\t\tadd    rax, rbx\n");
-                    fprintf (ctx->fp, "\n\t\tmov     %d[rdi], rax\n", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tadd     rax, rbx\n");
+                    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     break;
 
                 case SUB:
                         
-                    fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]",  
-                             (ctx->tempVar - 1) * variableSize);
-                    fprintf (ctx->fp, "\n\t\tmov     rbx, %d[rdi]", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]",  
+                             ((ctx->tempVar + ctx->nVarInFunc) - 1) * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rbx, -%d[rbp]", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     ctx->tempVar--;
 
-                    fprintf (ctx->fp, "\n\t\tsub    rax,  rbx\n");
-                    fprintf (ctx->fp, "\n\t\tmov     %d[rdi], rax\n", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tsub     rax,  rbx\n");
+                    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     break;
 
                 case MUL:
 
-                    fprintf (ctx->fp, "\n\t\tmov     rax, %d[rdi]",  
-                             (ctx->tempVar - 1) * variableSize);
-                    fprintf (ctx->fp, "\n\t\tmul     qword %d[rdi]", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]",  
+                             ((ctx->tempVar + ctx->nVarInFunc) - 1) * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmul     qword -%d[rbp]", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     ctx->tempVar--;
 
-                    fprintf (ctx->fp, "\n\t\tmov     %d[rdi], rax\n", 
-                            ctx->tempVar * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
                     break;
 
-//                 case DIV:
+                case DIV:
 
-//                     fprintf (ctx->fp, "\n\t\tdiv");
+                    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]",  
+                             ((ctx->tempVar + ctx->nVarInFunc) - 1) * variableSize);
+                    fprintf (ctx->fp, "\n\t\txor     rdx, rdx");  
+                    fprintf (ctx->fp, "\n\t\tdiv     qword -%d[rbp]", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
-//                     break;
+                    ctx->tempVar--;
 
-//                 case SQRT:
+                    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
 
-//                     fprintf (ctx->fp, "\n\t\tsqrt");
 
-//                     break;
+                    break;
+
+                case SQRT:
+
+                        fprintf (ctx->fp, "\n\n\t\t; сохраняем локальные перменные");
+                        fprintf (ctx->fp, "\n\t\tsub     rsp, %d\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize); 
+
+                        fprintf (ctx->fp, "\n\t\t; передаем аргументы");
+                    fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]",  
+                                ((ctx->tempVar + ctx->nVarInFunc)) * variableSize);
+                    fprintf (ctx->fp, "\n\t\tmov     rdi, rax");
+
+                        fprintf (ctx->fp, "\n\n\t\t; Вызов функции");
+                        fprintf (ctx->fp, "\n\n\t\tpush    rbp");
+                    fprintf (ctx->fp, "\n\n\t\tcall MySqrt");
+                        fprintf (ctx->fp, "\n\n\t\tpop     rbp");
+
+                        fprintf (ctx->fp, "\n\n\t\t; возвращаем rsp");
+                        fprintf (ctx->fp, "\n\t\tadd     rsp, %d", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);
+
+                    fprintf (ctx->fp, "\n\n\t\t; значениe return");
+                    fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+                            (ctx->tempVar + ctx->nVarInFunc) * variableSize);
+
+
+                    break;
 
 //                 case POW:
 

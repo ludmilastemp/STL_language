@@ -27,7 +27,6 @@ struct BackEndCtx
     int nWhile;
     int tempVar;
     int nVarInFunc;
-    int nVarBefore;
 };
 
 int CompileProgram (BackEndCtx* ctx);

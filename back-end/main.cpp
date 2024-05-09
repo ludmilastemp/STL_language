@@ -36,8 +36,7 @@ int main (const int argc, const char** argv)
                        .var        = &var,
                        .nIf        = 1,
                        .nWhile     = 1,
-                       .nVarInFunc = 0,
-                       .nVarBefore = 0 };
+                       .nVarInFunc = 0 };
 
     CompileProgram (&ctx);
 

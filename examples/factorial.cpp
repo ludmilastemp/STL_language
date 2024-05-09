@@ -24,6 +24,8 @@
 
 \VCEGO_XOROSHEGO
 
+    (: no :)
+
     \gravo no :)
 
     no ::= :( Factorial >|< no ): :)

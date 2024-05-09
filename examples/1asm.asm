@@ -1,237 +1,75 @@
 
 global Func
+extern MySqrt
 
 section .data
-variable: db 512 DUP (0)
-endStack: db 1
 
 section .text
 ; начало main
 
 Func:
 
-		mov     rdi, variable
-		add     rdi, 64
+		mov     rbp, rsp
 
 
 ;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
 
 
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-
+		        ; const 16 
+		mov     qword -16[rbp], 16
 
 
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+		        ; const 5 
+		mov     qword -24[rbp], 5
 
 
-		; Assign no
+		        ; const 1 
+		mov     qword -32[rbp], 1
 
-		        ; variableSize 7 
-		mov     qword 8[rdi], 7
+		mov     rax, -24[rbp]
+		mov     rbx, -32[rbp]
+		add     rax, rbx
 
-		mov     rax, 8[rdi]
-		mov     -0[rdi], rax
-
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
+		mov     -24[rbp], rax
 
 
+		; сохраняем локальные перменные
+		sub     rsp, 32
 
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-
-		; Assign no
 		; передаем аргументы
-
-		        ; variable no
-		mov     rax, -0[rdi]
-		mov     8[rdi], rax
-
-		xor     rax, rax
-		mov     rax, 8[rdi]
-		push    rax
+		mov     rax, -24[rbp]
+		mov     rdi, rax
 
 		; Вызов функции
-		push    rdi
 
-		call Func_0_
+		push    rbp
 
-		pop     rdi
+		call MySqrt
 
+		pop     rbp
 
-		; Значение return
-		mov     8[rdi], rax
+		; возвращаем rsp
+		add     rsp, 32
 
-		mov     rax, 8[rdi]
-		mov     -0[rdi], rax
+		; значениe return
+		mov     -24[rbp], rax
+
+		mov     rax, -16[rbp]
+		xor     rdx, rdx
+		div     qword -24[rbp]
+		mov     -16[rbp], rax
+
+		; значениe return
+		xor     rax, rax
+		mov     rax, -16[rbp]
+
+		ret
 
 
 ;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
 
 
-
-		xor     rax, rax
-		mov     rax, [rdi]
 
 		ret
 
 ; конец main
-
-
-
-
-; начало функции
-
-Func_0_:
-
-		add     rdi, 64
-
-
-		pop     rcx
-		pop     rdx
-
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-		pop     rax
-		mov     -16[rdi], rax
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-		push    rdx
-		push    rcx
-
-
-
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-
-		; Assign p
-
-		        ; variable k
-		mov     rax, -16[rdi]
-		mov     8[rdi], rax
-
-
-		        ; variableSize 1 
-		mov     qword 16[rdi], 1
-
-		mov     rax, 8[rdi]
-		mov     rbx, 16[rdi]
-		sub    rax,  rbx
-
-		mov     8[rdi], rax
-
-		mov     rax, 8[rdi]
-		mov     -8[rdi], rax
-
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-
-
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-
-.if_1_condition:
-
-		        ; variable k
-		mov     rax, -16[rdi]
-		mov     8[rdi], rax
-
-
-		        ; variableSize 1 
-		mov     qword 16[rdi], 1
-
-		mov     rax, 8[rdi]
-		mov     rbx, 16[rdi]
-		cmp    rax, rbx
-
-		je .if_1_body
-		jmp .else_1_body
-
-.if_1_body:
-
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-
-		        ; variableSize 1 
-		mov     qword 8[rdi], 1
-
-		; значениe return
-		xor     rax, rax
-		mov     rax, 8[rdi]
-
-		ret
-
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-
-		jmp .if_1_end
-
-.else_1_body:
-		jmp .if_1_end
-
-.if_1_end:
-
-
-
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-
-
-
-;-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-
-		; передаем аргументы
-
-		        ; variable p
-		mov     rax, -8[rdi]
-		mov     8[rdi], rax
-
-		xor     rax, rax
-		mov     rax, 8[rdi]
-		push    rax
-
-		; Вызов функции
-		push    rdi
-
-		call Func_0_
-
-		pop     rdi
-
-
-		; Значение return
-		mov     8[rdi], rax
-
-
-		        ; variable k
-		mov     rax, -16[rdi]
-		mov     16[rdi], rax
-
-		mov     rax, 8[rdi]
-		mul     qword 16[rdi]
-		mov     8[rdi], rax
-
-		; значениe return
-		xor     rax, rax
-		mov     rax, 8[rdi]
-
-		ret
-
-
-;-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-
-
-
-
-		ret
-
-; конец функции
