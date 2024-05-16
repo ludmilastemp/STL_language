@@ -4,7 +4,7 @@
 extern "C" int Func ();
 extern "C" int MySqrt (int);
 
-// extern "C" void MyPrint ();
+extern "C" int MyPrint ();
 
 int main ()
 {
@@ -13,10 +13,12 @@ int main ()
 
 int MySqrt (int x)
 {
-    return (int)(sqrt(double(x)));
+    return (int)(sqrt((double)x));
 }
 
-// void MyPrint ()
-// {
-//     printf ("HI!\n");
-// }
+int MyPrint ()
+{
+    printf ("HI!\n");
+
+    return 0;
+}

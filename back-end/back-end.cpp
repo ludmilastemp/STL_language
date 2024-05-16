@@ -1,6 +1,7 @@
 #include "back-end.h"
 
 #define $printf(...)
+// #define PRINT_FUNCTION() do { printf("I'm in %s\n", __PRETTY_FUNCTION__); } while (0)
 
 static int CompileMultipleOperations (BackEndCtx* ctx);
 static int CompileOperation          (BackEndCtx* ctx);
@@ -13,10 +14,6 @@ static int CompileAssign             (BackEndCtx* ctx);
 static int CompileConditionOp        (BackEndCtx* ctx);
 static int CompileCreate             (BackEndCtx* ctx);
 static int CompileExpression         (BackEndCtx* ctx);
-
-                           // сюда тоже IsOpCode и тп
-
-// variableSize int nSpace = 20;
 
 int CompileProgram (BackEndCtx* ctx)
 {
@@ -246,7 +243,7 @@ static int CompileFormalArguments (BackEndCtx* ctx)
 static int CompileActualArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileActualArguments\n"); // #define PRINT_FUNCTION() do { printf("I'm in %s\n", __PRETTY_FUNCTION__); } while (0)
+    $printf ("I in CompileActualArguments\n"); 
 
     NodeBinTree* oldNode = nullptr;
 
@@ -529,8 +526,6 @@ static int CompileExpression (BackEndCtx* ctx)
                     (ctx->node->data->variable + 1) * variableSize);
             fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
                     (ctx->tempVar + ctx->nVarInFunc) * variableSize);
-
-            // PrintfVar (ctx);
 
             break;
 
