@@ -30,6 +30,30 @@ front-end: 	front-end/main.cpp 								\
 		$(FLAGS)											\
 		-o front-end.exe
 
+back-end-BIN: 	back-end-BIN/main.cpp 						\
+			back-end-BIN/back-end.h  						\
+			back-end-BIN/back-end.cpp						\
+			lib/STL_BinTree/STL_bintree_struct.h        	\
+			lib/STL_BinTree/STL_bintree_struct.cpp      	\
+			lib/STL_BinTree/STL_bintree_node_struct.h		\
+			lib/STL_Graphviz/STL_graphviz.h					\
+			lib/STL_Graphviz/STL_graphviz.cpp				\
+			lib/STL_Onegin/STL_file_open.h					\
+			lib/STL_Onegin/STL_file_open.cpp 				\
+			lib/STL_Onegin/STL_string.h                 	\
+			temp/stack_var_func.o                      		\
+			temp/stack_var_error.o                     		\
+
+	g++ back-end-BIN/main.cpp								\
+		back-end-BIN/back-end.cpp							\
+		lib/STL_BinTree/STL_bintree_struct.cpp        		\
+		lib/STL_Graphviz/STL_graphviz.cpp					\
+		lib/STL_Onegin/STL_file_open.cpp        			\
+		temp/stack_var_func.o                      			\
+		temp/stack_var_error.o                     			\
+		$(FLAGS)											\
+		-o back-end-BIN.exe
+
 back-end-NASM: 	back-end-NASM/main.cpp 						\
 			back-end-NASM/back-end.h  						\
 			back-end-NASM/back-end.cpp						\
@@ -145,13 +169,12 @@ spu:    	lib/STL_Spu/main.cpp 							\
 		$(FLAGS)											\
 		-o spu.exe
 
-.PHONY: front-end back-end-NASM execute-NASM ack-end-SPU compile spu clean
+.PHONY: front-end back-end-BIN back-end-NASM execute-NASM ack-end-SPU compile spu clean
 
 FLAGS = -O3 										\
-		-D											\
-		_DEBUG										\
+		-D _DEBUG									\
 		-ggdb3										\
-		-pie										\
+		-no-pie										\
 		-std=c++17									\
 		-Waggressive-loop-optimizations 			\
 		-Wall										\
@@ -209,7 +232,7 @@ FLAGS = -O3 										\
 		-fcheck-new									\
 		-flto-odr-type-merging						\
 		-fno-omit-frame-pointer						\
-		-fPIE										\
+		-fno-PIE									\
 		-fsized-deallocation						\
 		-fstack-protector							\
 		-fstrict-overflow							\
