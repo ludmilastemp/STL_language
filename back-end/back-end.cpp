@@ -304,8 +304,8 @@ static int CompileAssign (BackEndCtx* ctx)
     fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax", 
              (oldNode->left->data->variable + 1) * variableSize);
 
-    if (ctx->node->data->variable >= ctx->nVarInFunc)
-        ctx->nVarInFunc = ctx->node->data->variable;
+    if (oldNode->left->data->variable >= ctx->nVarInFunc)
+        ctx->nVarInFunc = oldNode->left->data->variable;
 
     ctx->node = oldNode;
 
