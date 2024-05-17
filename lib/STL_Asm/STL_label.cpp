@@ -1,5 +1,7 @@
 #include "STL_label.h"
 
+#define $printf(...)
+
 static int CreateLabel (Stack_Label* labels, const size_t nLabel, const char* name, const int byte);
 
 static size_t FindLabel   (Stack_Label* labels, const char* string);
@@ -11,14 +13,14 @@ int SetLabel (const char* string, const size_t ip, Stack_Label* labels)
     assert (string);
     assert (labels);
 
-printf ("\n\nI IN SetLabel\n");
-printf ("\tip = %lu\n", ip);
+$printf ("\n\nI IN SetLabel\n");
+$printf ("\tip = %lu\n", ip);
 
     size_t nLabel = FindLabel (labels, string);
 
     CreateLabel (labels, nLabel, string, (int)ip);
 
-printf ("\n\nI END SetLabel\n");
+$printf ("\n\nI END SetLabel\n");
 
     return 0;
 }
@@ -31,8 +33,8 @@ int SetLabelArg (const char* string, char* str, size_t* ip, Stack_Label* labels,
     assert (labels);
     assert (fixups);
 
-printf ("\n\nI IN SetLabelArg\n");
-printf ("\tip = %lu\n", *ip);
+$printf ("\n\nI IN SetLabelArg\n");
+$printf ("\tip = %lu\n", *ip);
 
     size_t nLabel = FindLabel (labels, string);
 
@@ -46,7 +48,7 @@ printf ("\tip = %lu\n", *ip);
 
         *ip += sizeof (SPU_DATA_TYPE);
 
-printf ("\n\nI END111 SetLabelArg\n");
+$printf ("\n\nI END111 SetLabelArg\n");
 
         return 0;
     }
@@ -61,7 +63,7 @@ printf ("\n\nI END111 SetLabelArg\n");
 
     *ip += sizeof (SPU_DATA_TYPE);
 
-printf ("\n\nI END222 SetLabelArg\n");
+$printf ("\n\nI END222 SetLabelArg\n");
 
     return 0;
 }
@@ -91,15 +93,15 @@ int LabelsDump (const Stack_Label* labels)
 
     for (size_t i = 0; i < labels->size; ++i)
     {
-        printf ("labels[%lu] \n", i);
-        printf ("\t name = <");
+        $printf ("labels[%lu] \n", i);
+        $printf ("\t name = <");
         for (size_t j = 0; j < labels->data[i].lenName; ++j)
         {
-            printf ("%c", (labels->data[i].name)[j]);
+            $printf ("%c", (labels->data[i].name)[j]);
         }
-        printf (">\n");
-        printf ("\t lenN = %lu \n", labels->data[i].lenName);
-        printf ("\t byte = %d \n", labels->data[i].address);
+        $printf (">\n");
+        $printf ("\t lenN = %lu \n", labels->data[i].lenName);
+        $printf ("\t byte = %d \n", labels->data[i].address);
     }
 
     return 0;
@@ -111,9 +113,9 @@ int FixupsDump (const Stack_Fixup* fixups)
 
     for (size_t i = 0; i < fixups->size; i++)
     {
-        printf ("fixup = %lu\n", i);
-        printf ("\t index = %lu\n", fixups->data[i].labelIndex);
-        printf ("\t byte  = %lu\n", fixups->data[i].address);
+        $printf ("fixup = %lu\n", i);
+        $printf ("\t index = %lu\n", fixups->data[i].labelIndex);
+        $printf ("\t byte  = %lu\n", fixups->data[i].address);
     }
 
     return 0;
@@ -124,29 +126,29 @@ static int CreateLabel (Stack_Label* labels, const size_t nLabel, const char* na
     assert (labels);
     assert (name);
 
-printf ("\n\nI IN CreateLabel\n");
+$printf ("\n\nI IN CreateLabel\n");
 
     Label newLabel = { name, StrlenUpToSpace (name), byte };
 
 /*
 int len = StrlenUpToSpace (name);
-printf ("\n\tstrlen = %d\n\tname = ", len);
+$printf ("\n\tstrlen = %d\n\tname = ", len);
 for (int i = 0; i < len; i++)
-printf ("%c", name[i]);
-printf ("\n");*/
+$printf ("%c", name[i]);
+$printf ("\n");*/
 
     if (nLabel == labels->size)
     {
-        printf ("\t111\n");
+        $printf ("\t111\n");
         StackPush (labels, newLabel);
     }
     else
     {
-        printf ("\t222\n");
+        $printf ("\t222\n");
         labels->data[nLabel].address = byte;
     }
 
-printf ("\n\nI END CreateLabel\n");
+$printf ("\n\nI END CreateLabel\n");
 
 
     return 0;
@@ -159,7 +161,7 @@ static size_t FindLabel (Stack_Label* labels, const char* string)
 
     size_t i = 0;
 
-printf ("\n\nI IN FindLabel\n");
+$printf ("\n\nI IN FindLabel\n");
 
     for (; i < labels->size; ++i)
     {
@@ -171,19 +173,19 @@ printf ("\n\nI IN FindLabel\n");
 
 /*
 int len = StrlenUpToSpace (string);
-printf ("\n\tstrlen = %d\n\tname = ", len);
+$printf ("\n\tstrlen = %d\n\tname = ", len);
 for (int j = 0; j < len; j++)
-printf ("%c", string[j]);
-printf ("\n");
+$printf ("%c", string[j]);
+$printf ("\n");
 
-printf ("\ti    = %d\n", i);
-printf ("\tsize = %d\n", (int)labels->size);
+$printf ("\ti    = %d\n", i);
+$printf ("\tsize = %d\n", (int)labels->size);
 */
-//printf ("labels->data[i].lenName = %d\n", labels->data[i].lenName);
+//$printf ("labels->data[i].lenName = %d\n", labels->data[i].lenName);
 //for (int j = 0; j < labels->data[i].lenName; ++j)
-//    printf ("labels->data[i].name = %c\n", labels->data[i].name[j]);
+//    $printf ("labels->data[i].name = %c\n", labels->data[i].name[j]);
 
-printf ("\n\nI END FindLabel\n");
+$printf ("\n\nI END FindLabel\n");
 
     return i;
 }
@@ -201,4 +203,6 @@ static size_t StrlenUpToSpace (const char* const string)
 
     return i;
 }
+
+#undef $printf
 

@@ -4,7 +4,7 @@ int main (const int argc, const char** argv)
 {
     const char* argv1 = 0;
 
-    if (argc == 1) argv1 = "examples/1bin.bin";
+    if (argc == 1) argv1 = "examples/1-spu.bin";
     else argv1 = argv[1];
 
     SPU (argv1);

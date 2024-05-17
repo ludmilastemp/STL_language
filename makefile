@@ -54,7 +54,7 @@ back-end-NASM: 	back-end-NASM/main.cpp 						\
 		$(FLAGS)											\
 		-o back-end-NASM.exe
 
-execute-NASM: 	execute-NASM/main.cpp							\
+execute-NASM: 	execute-NASM/main.cpp						\
 			execute-NASM/nasm.o
 	g++ execute-NASM/main.cpp 								\
 		execute-NASM/nasm.o 								\
@@ -64,7 +64,88 @@ execute-NASM: 	execute-NASM/main.cpp							\
 execute-NASM/nasm.o: examples/1-nasm.asm
 	nasm -f elf64 examples/1-nasm.asm -o execute-NASM/nasm.o
 
-.PHONY: front-end back-end-NASM execute-NASM clean
+back-end-SPU: 	back-end-SPU/main.cpp 						\
+			back-end-SPU/back-end.h  						\
+			back-end-SPU/back-end.cpp						\
+			lib/STL_BinTree/STL_bintree_struct.h        	\
+			lib/STL_BinTree/STL_bintree_struct.cpp      	\
+			lib/STL_BinTree/STL_bintree_node_struct.h		\
+			lib/STL_Graphviz/STL_graphviz.h					\
+			lib/STL_Graphviz/STL_graphviz.cpp				\
+			lib/STL_Onegin/STL_file_open.h					\
+			lib/STL_Onegin/STL_file_open.cpp 				\
+			lib/STL_Onegin/STL_string.h                 	\
+			temp/stack_var_func.o                      		\
+			temp/stack_var_error.o                     		\
+
+	g++ back-end-SPU/main.cpp								\
+		back-end-SPU/back-end.cpp							\
+		lib/STL_BinTree/STL_bintree_struct.cpp        		\
+		lib/STL_Graphviz/STL_graphviz.cpp					\
+		lib/STL_Onegin/STL_file_open.cpp        			\
+		temp/stack_var_func.o                      			\
+		temp/stack_var_error.o                     			\
+		$(FLAGS)											\
+		-o back-end-SPU.exe
+
+compile: 	lib/STL_Asm/main.cpp 							\
+			lib/STL_Asm/STL_compile.h 						\
+			lib/STL_Asm/STL_compile.cpp 					\
+			lib/STL_Asm/STL_label.h        					\
+			lib/STL_Asm/STL_label.cpp   					\
+			lib/STL_Asm/STL_label_struct.h 					\
+			lib/STL_Spu/include/STL_spu_struct_const.h  	\
+			lib/STL_Spu/include/STL_spu_struct_const.cpp	\
+			lib/STL_Onegin/STL_string.h                 	\
+			lib/STL_Onegin/STL_header.h						\
+			lib/STL_Onegin/STL_header.cpp					\
+			lib/STL_Onegin/STL_file_open.h 					\
+			lib/STL_Onegin/STL_file_open.cpp				\
+			temp/stack_label_func.o                      	\
+			temp/stack_label_error.o                    	\
+			temp/stack_fixup_func.o                      	\
+			temp/stack_fixup_error.o                     	\
+
+	g++ lib/STL_Asm/main.cpp 								\
+		lib/STL_Asm/STL_compile.cpp 						\
+		lib/STL_Asm/STL_label.cpp 							\
+		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
+		lib/STL_Onegin/STL_header.cpp						\
+		lib/STL_Onegin/STL_file_open.cpp					\
+		temp/stack_label_func.o                      		\
+		temp/stack_label_error.o                     		\
+		temp/stack_fixup_func.o                      		\
+		temp/stack_fixup_error.o                     		\
+		$(FLAGS)											\
+		-o compile.exe
+
+spu:    	lib/STL_Spu/main.cpp 							\
+			lib/STL_Spu/STL_spu.h   						\
+			lib/STL_Spu/STL_spu.cpp 						\
+			lib/STL_Spu/STL_spu_struct.h 					\
+			lib/STL_Spu/STL_spu_struct.cpp 					\
+			lib/STL_Spu/include/STL_spu_struct_const.h      \
+			lib/STL_Spu/include/STL_spu_struct_const.cpp    \
+			lib/STL_Onegin/STL_string.h                     \
+			lib/STL_Onegin/STL_file_open.h 					\
+			lib/STL_Onegin/STL_file_open.cpp				\
+			lib/STL_Onegin/STL_header.h						\
+			lib/STL_Onegin/STL_header.cpp					\
+			temp/stack_int_func.o 							\
+			temp/stack_int_error.o 							\
+
+	g++ lib/STL_Spu/main.cpp 								\
+		lib/STL_Spu/STL_spu.cpp 							\
+		lib/STL_Spu/STL_spu_struct.cpp 						\
+		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
+		lib/STL_Onegin/STL_file_open.cpp					\
+		lib/STL_Onegin/STL_header.cpp						\
+		temp/stack_int_func.o 								\
+		temp/stack_int_error.o 								\
+		$(FLAGS)											\
+		-o spu.exe
+
+.PHONY: front-end back-end-NASM execute-NASM ack-end-SPU compile spu clean
 
 FLAGS = -O3 										\
 		-D											\
