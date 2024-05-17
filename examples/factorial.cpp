@@ -26,8 +26,6 @@
 
     (: no :)
 
-    \gravo no :)
-
     no ::= :( Factorial >|< no ): :)
 
     no ::= 5 :)

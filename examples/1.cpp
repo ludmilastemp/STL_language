@@ -24,6 +24,32 @@
 
 \VCEGO_XOROSHEGO
 
-    (: 16 / sqrt (5 + 1) :)
+    n ::= n :)
+
+    n ::= :( Fib >|< n ): :)
+
+    n ::= 8 :)
+
+    \Z \ni n :)
 
 \teornma
+
+\oed
+    (: tmp :)
+
+    tmp ::= tmp + :( Fib >|< (k - 2) ): :) 
+    tmp ::= tmp + :( Fib >|< (k - 1) ): :) 
+    tmp ::= 0 :)
+
+    \katarce
+        k <= 2
+    \katapanma
+
+        <=>
+
+    \katarce
+        (: 1 :)
+    \katapanma  :)
+
+
+\lemma :( Fib >|< k ):

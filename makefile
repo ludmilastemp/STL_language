@@ -30,9 +30,9 @@ front-end: 	front-end/main.cpp 								\
 		$(FLAGS)											\
 		-o front-end.exe
 
-back-end: 	back-end/main.cpp 								\
-			back-end/back-end.h  							\
-			back-end/back-end.cpp							\
+back-end-NASM: 	back-end-NASM/main.cpp 						\
+			back-end-NASM/back-end.h  						\
+			back-end-NASM/back-end.cpp						\
 			lib/STL_BinTree/STL_bintree_struct.h        	\
 			lib/STL_BinTree/STL_bintree_struct.cpp      	\
 			lib/STL_BinTree/STL_bintree_node_struct.h		\
@@ -44,27 +44,27 @@ back-end: 	back-end/main.cpp 								\
 			temp/stack_var_func.o                      		\
 			temp/stack_var_error.o                     		\
 
-	g++ back-end/main.cpp									\
-		back-end/back-end.cpp								\
+	g++ back-end-NASM/main.cpp								\
+		back-end-NASM/back-end.cpp							\
 		lib/STL_BinTree/STL_bintree_struct.cpp        		\
 		lib/STL_Graphviz/STL_graphviz.cpp					\
 		lib/STL_Onegin/STL_file_open.cpp        			\
 		temp/stack_var_func.o                      			\
 		temp/stack_var_error.o                     			\
 		$(FLAGS)											\
-		-o back-end.exe
+		-o back-end-NASM.exe
 
-execute: 	execute/main.cpp								\
-			execute/asm.o
-	g++ execute/main.cpp 									\
-		execute/asm.o 										\
+execute-NASM: 	execute-NASM/main.cpp							\
+			execute-NASM/nasm.o
+	g++ execute-NASM/main.cpp 								\
+		execute-NASM/nasm.o 								\
 		$(FLAGS) 											\
-		-o execute.exe
+		-o execute-NASM.exe
 
-execute/asm.o: examples/1asm.asm
-	nasm -f elf64 examples/1asm.asm -o execute/asm.o
+execute-NASM/nasm.o: examples/1-nasm.asm
+	nasm -f elf64 examples/1-nasm.asm -o execute-NASM/nasm.o
 
-.PHONY: front-end back-end compile spu clean
+.PHONY: front-end back-end-NASM execute-NASM clean
 
 FLAGS = -O3 										\
 		-D											\
