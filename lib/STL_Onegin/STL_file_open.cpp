@@ -111,8 +111,8 @@ static void SplitIntoLines (File* file)
 
 int STL_Fclose (struct File* file)
 {
-    free (file->text);
-    free (file->strings);
+    if (file->text) free (file->text);
+    if (file->strings) free (file->strings);
 
     file->name    = 0;
     file->fp      = nullptr;

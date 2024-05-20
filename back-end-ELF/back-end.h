@@ -1,6 +1,7 @@
 #ifndef STL_back_end_
 #define STL_back_end_
 
+#include "gen.h"
 #include "../lib/STL_BinTree/STL_bintree_struct.h"
 
 enum ErrorInFunction

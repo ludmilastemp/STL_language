@@ -26,8 +26,8 @@ Func:
 
 		; Assign n
 
-		        ; const 5 
-		mov     qword -16[rbp], 5
+		        ; const 42 
+		mov     qword -16[rbp], 42
 
 		mov     rax, -16[rbp]
 		mov     -8[rbp], rax

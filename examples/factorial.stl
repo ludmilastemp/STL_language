@@ -22,24 +22,33 @@
 =^. В конце нужно пожелать богам программы всего хорошего!          .^=
 =^..^=
 
+=^.                       .^=
+=^. Посчитаем факториал 5 .^=
+=^.                       .^=
+
+
+
 \VCEGO_XOROSHEGO
 
-    (: no :)
+    n ::= n :)
 
-    no ::= :( Factorial >|< no ): :)
+    n ::= :( Fib >|< n ): :)
 
-    no ::= 5 :)
+    n ::= 42 :)
 
-    \Z \ni no :)
+    \Z \ni n :)
 
 \teornma
 
 \oed
-    (: :( Factorial >|< (p) ): * k :)
+    (: tmp :)
 
+    tmp ::= tmp + :( Fib >|< (k - 2) ): :) 
+    tmp ::= tmp + :( Fib >|< (k - 1) ): :) 
+    tmp ::= 0 :)
 
     \katarce
-        k == 1
+        k <= 2
     \katapanma
 
         <=>
@@ -48,8 +57,29 @@
         (: 1 :)
     \katapanma  :)
 
-    p ::= k - 1 :)
 
+\lemma :( Fib >|< k ):
 
-\lemma :( Factorial >|< k ):
+=^.
+\VCEGO_XOROSHEGO
 
+    fact ::= :( Factorial >|< fact ): :)
+
+    fact ::= 5 :)
+    \Z \ni fact :)
+
+\teornma
+
+\oed
+    (: n * :( Factorial >|< (n - 1) ): :)
+
+    \katarce
+        n == 1
+    \katapanma
+        <=>
+    \katarce 
+        (: 1 :)
+    \katapanma  :)
+
+\lemma :( Factorial >|< n ):
+.^=

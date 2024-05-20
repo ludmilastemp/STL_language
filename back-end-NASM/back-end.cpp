@@ -25,7 +25,6 @@ int CompileProgram (BackEndCtx* ctx)
 
     fprintf (ctx->fp, "\nglobal Func");
     fprintf (ctx->fp, "\nextern MySqrt");
-    fprintf (ctx->fp, "\n\nsection .data");
     fprintf (ctx->fp, "\n\nsection .text");
 
     /**

@@ -30,9 +30,11 @@ front-end: 	front-end/main.cpp 								\
 		$(FLAGS)											\
 		-o front-end.exe
 
-back-end-BIN: 	back-end-BIN/main.cpp 						\
-			back-end-BIN/back-end.h  						\
-			back-end-BIN/back-end.cpp						\
+back-end-ELF: 	back-end-ELF/main.cpp 						\
+			back-end-ELF/back-end.h  						\
+			back-end-ELF/back-end.cpp						\
+			back-end-ELF/gen.h  						    \
+			back-end-ELF/gen.cpp							\
 			lib/STL_BinTree/STL_bintree_struct.h        	\
 			lib/STL_BinTree/STL_bintree_struct.cpp      	\
 			lib/STL_BinTree/STL_bintree_node_struct.h		\
@@ -44,15 +46,43 @@ back-end-BIN: 	back-end-BIN/main.cpp 						\
 			temp/stack_var_func.o                      		\
 			temp/stack_var_error.o                     		\
 
-	g++ back-end-BIN/main.cpp								\
-		back-end-BIN/back-end.cpp							\
+	g++ back-end-ELF/main.cpp								\
+		back-end-ELF/back-end.cpp							\
+		back-end-ELF/gen.cpp								\
 		lib/STL_BinTree/STL_bintree_struct.cpp        		\
 		lib/STL_Graphviz/STL_graphviz.cpp					\
 		lib/STL_Onegin/STL_file_open.cpp        			\
 		temp/stack_var_func.o                      			\
 		temp/stack_var_error.o                     			\
 		$(FLAGS)											\
-		-o back-end-BIN.exe
+		-o back-end-ELF.exe
+
+back-end-JIT: 	back-end-JIT/main.cpp 						\
+			back-end-ELF/back-end.h  						\
+			back-end-ELF/back-end.cpp						\
+			back-end-ELF/gen.h  						    \
+			back-end-ELF/gen.cpp							\
+			lib/STL_BinTree/STL_bintree_struct.h        	\
+			lib/STL_BinTree/STL_bintree_struct.cpp      	\
+			lib/STL_BinTree/STL_bintree_node_struct.h		\
+			lib/STL_Graphviz/STL_graphviz.h					\
+			lib/STL_Graphviz/STL_graphviz.cpp				\
+			lib/STL_Onegin/STL_file_open.h					\
+			lib/STL_Onegin/STL_file_open.cpp 				\
+			lib/STL_Onegin/STL_string.h                 	\
+			temp/stack_var_func.o                      		\
+			temp/stack_var_error.o                     		\
+
+	g++ back-end-JIT/main.cpp								\
+		back-end-ELF/back-end.cpp							\
+		back-end-ELF/gen.cpp								\
+		lib/STL_BinTree/STL_bintree_struct.cpp        		\
+		lib/STL_Graphviz/STL_graphviz.cpp					\
+		lib/STL_Onegin/STL_file_open.cpp        			\
+		temp/stack_var_func.o                      			\
+		temp/stack_var_error.o                     			\
+		$(FLAGS)											\
+		-o back-end-JIT.exe
 
 back-end-NASM: 	back-end-NASM/main.cpp 						\
 			back-end-NASM/back-end.h  						\
@@ -85,8 +115,8 @@ execute-NASM: 	execute-NASM/main.cpp						\
 		$(FLAGS) 											\
 		-o execute-NASM.exe
 
-execute-NASM/nasm.o: examples/1-nasm.asm
-	nasm -f elf64 examples/1-nasm.asm -o execute-NASM/nasm.o
+execute-NASM/nasm.o: examples/nasm.asm
+	nasm -f elf64 examples/nasm.asm -o execute-NASM/nasm.o
 
 back-end-SPU: 	back-end-SPU/main.cpp 						\
 			back-end-SPU/back-end.h  						\
@@ -169,7 +199,33 @@ spu:    	lib/STL_Spu/main.cpp 							\
 		$(FLAGS)											\
 		-o spu.exe
 
-.PHONY: front-end back-end-BIN back-end-NASM execute-NASM ack-end-SPU compile spu clean
+spu-fast:   lib/STL_Spu/main.cpp 							\
+			lib/STL_Spu/STL_spu.h   						\
+			lib/STL_Spu/STL_spu.cpp 						\
+			lib/STL_Spu/STL_spu_struct.h 					\
+			lib/STL_Spu/STL_spu_struct.cpp 					\
+			lib/STL_Spu/include/STL_spu_struct_const.h      \
+			lib/STL_Spu/include/STL_spu_struct_const.cpp    \
+			lib/STL_Onegin/STL_string.h                     \
+			lib/STL_Onegin/STL_file_open.h 					\
+			lib/STL_Onegin/STL_file_open.cpp				\
+			lib/STL_Onegin/STL_header.h						\
+			lib/STL_Onegin/STL_header.cpp					\
+			temp/stack_int_func.o 							\
+			temp/stack_int_error.o 							\
+
+	g++ lib/STL_Spu/main.cpp 								\
+		lib/STL_Spu/STL_spu.cpp 							\
+		lib/STL_Spu/STL_spu_struct.cpp 						\
+		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
+		lib/STL_Onegin/STL_file_open.cpp					\
+		lib/STL_Onegin/STL_header.cpp						\
+		temp/stack_int_func.o 								\
+		temp/stack_int_error.o 								\
+		-Ofast -DNDEBUG										\
+		-o spu-fast.exe
+
+.PHONY: front-end back-end-ELF back-end-JIT back-end-NASM execute-NASM ack-end-SPU compile spu clean
 
 FLAGS = -O3 										\
 		-D _DEBUG									\
@@ -183,7 +239,7 @@ FLAGS = -O3 										\
 		-Wcast-qual									\
 		-Wchar-subscripts							\
 		-Wconditionally-supported					\
-		-Wconversion								\
+		-Wno-conversion									\
 		-Wctor-dtor-privacy							\
 		-Weffc++									\
 		-Wempty-body								\
@@ -238,3 +294,6 @@ FLAGS = -O3 										\
 		-fstrict-overflow							\
 		-fsanitize=address,alignment,bool,bounds,enum,float-cast-overflow,float-divide-by-zero,integer-divide-by-zero,leak,nonnull-attribute,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,undefined,unreachable,vla-bound,vptr
 		
+
+		
+#-Wconversion								\

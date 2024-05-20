@@ -8,10 +8,10 @@ int main (const int argc, const char** argv)
     const char* argv1 = 0;
     const char* argv2 = 0;
 
-    if (argc <= 1) argv1 = "examples/1tree.cpp";
+    if (argc <= 1) argv1 = "examples/tree.ast";
     else argv1 = argv[1];
 
-    if (argc <= 2) argv2 = "examples/1-spu.asm";
+    if (argc <= 2) argv2 = "examples/spu.asm";
     else argv2 = argv[2];
 
     File file = { .name = argv1 };
