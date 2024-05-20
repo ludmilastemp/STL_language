@@ -1,0 +1,256 @@
+<svg width="856" height="787" viewBox="0 0 885.43 830.38" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="translate(4.00000366210935,826.3800024414063) scale(1)">
+<polygon fill="white" stroke="none" points="-4,4 -4,-826.38 881.43,-826.38 881.43,4 -4,4"/>
+<!-- a -->
+<g id="node1" class="node">
+<title>STL</title>
+<polygon fill="#e0ffff" stroke="black" points="528.63,-822.38 451.42,-822.38 451.42,-786.38 534.63,-786.38 534.63,-816.38 528.63,-822.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="534.63,-816.38 528.63,-816.38"/>
+<text text-anchor="middle" x="493.02" y="-800.18" font-family="Courier New" font-size="14.00">STL file</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="528.63,-822.38 528.63,-816.38"/>
+
+</g><g id="node9" class="node">
+<title>FE</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M543.63,-736.38C543.63,-736.38 442.41,-736.38 442.41,-736.38 436.41,-736.38 430.41,-730.38 430.41,-724.38 430.41,-724.38 430.41,-712.38 430.41,-712.38 430.41,-706.38 436.41,-700.38 442.41,-700.38 442.41,-700.38 543.63,-700.38 543.63,-700.38 549.63,-700.38 555.63,-706.38 555.63,-712.38 555.63,-712.38 555.63,-724.38 555.63,-724.38 555.63,-730.38 549.63,-736.38 543.63,-736.38"/>
+
+<text text-anchor="middle" x="493.02" y="-714.18" font-family="Courier New" font-size="14.00">front-end.exe</text></g>
+<!-- b -->
+<g id="node2" class="node">
+<title>AST</title>
+<polygon fill="#e0ffff" stroke="black" points="514.02,-650.38 466.02,-650.38 466.02,-614.38 520.02,-614.38 520.02,-644.38 514.02,-650.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="520.02,-644.38 514.02,-644.38"/>
+<text text-anchor="middle" x="493.02" y="-628.18" font-family="Courier New" font-size="14.00">AST</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="514.02,-650.38 514.02,-644.38"/>
+
+</g>
+<!-- a&#45;&gt;b -->
+<g id="edge2" class="edge">
+<title>FE-&gt;AST</title>
+<path fill="none" stroke="black" d="M493.02,-699.98C493.02,-689.06 493.02,-674.7 493.02,-662.12"/>
+<polygon fill="black" stroke="black" points="496.52,-662.28 493.02,-652.28 489.52,-662.28 496.52,-662.28"/>
+</g>
+<!-- spu.asm -->
+<g id="node10" class="node">
+<title>BE-JIT</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M305.23,-392.38C305.23,-392.38 178.81,-392.38 178.81,-392.38 172.81,-392.38 166.81,-386.38 166.81,-380.38 166.81,-380.38 166.81,-368.38 166.81,-368.38 166.81,-362.38 172.81,-356.38 178.81,-356.38 178.81,-356.38 305.23,-356.38 305.23,-356.38 311.23,-356.38 317.23,-362.38 317.23,-368.38 317.23,-368.38 317.23,-380.38 317.23,-380.38 317.23,-386.38 311.23,-392.38 305.23,-392.38"/>
+
+<text text-anchor="middle" x="242.02" y="-370.18" font-family="Courier New" font-size="14.00">back-end-JIT.exe</text></g>
+<!-- AST&#45;&gt;spu.asm -->
+<g id="node11" class="node">
+<title>BE-JIT-P</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M256.04,-220.38C256.04,-220.38 12,-220.38 12,-220.38 6,-220.38 0,-214.38 0,-208.38 0,-208.38 0,-196.38 0,-196.38 0,-190.38 6,-184.38 12,-184.38 12,-184.38 256.04,-184.38 256.04,-184.38 262.04,-184.38 268.04,-190.38 268.04,-196.38 268.04,-196.38 268.04,-208.38 268.04,-208.38 268.04,-214.38 262.04,-220.38 256.04,-220.38"/>
+
+<text text-anchor="middle" x="134.02" y="-198.18" font-family="Courier New" font-size="14.00">back-end-JIT.exe --precompiled</text></g>
+<!-- nasm.asm -->
+<g id="node12" class="node">
+<title>BE-ELF</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M456.23,-564.38C456.23,-564.38 329.81,-564.38 329.81,-564.38 323.81,-564.38 317.81,-558.38 317.81,-552.38 317.81,-552.38 317.81,-540.38 317.81,-540.38 317.81,-534.38 323.81,-528.38 329.81,-528.38 329.81,-528.38 456.23,-528.38 456.23,-528.38 462.23,-528.38 468.23,-534.38 468.23,-540.38 468.23,-540.38 468.23,-552.38 468.23,-552.38 468.23,-558.38 462.23,-564.38 456.23,-564.38"/>
+
+<text text-anchor="middle" x="393.02" y="-542.18" font-family="Courier New" font-size="14.00">back-end-ELF.exe</text></g><g id="edge4" class="edge">
+<title>BE-JIT-&gt;Исполнение</title>
+<path fill="none" stroke="black" d="M254.2,-356.1C284.04,-313.74 362.03,-203.04 412.14,-131.9"/>
+<polygon fill="black" stroke="black" points="414.95,-133.99 417.84,-123.8 409.22,-129.96 414.95,-133.99"/>
+</g><g id="edge5" class="edge">
+<title>BE-JIT-&gt;JIT</title>
+<path fill="none" stroke="black" d="M229.8,-355.98C221.73,-344.49 211,-329.21 201.85,-316.19"/>
+<polygon fill="black" stroke="black" points="204.71,-314.18 196.1,-308.01 198.98,-318.2 204.71,-314.18"/>
+</g>
+<!-- AST&#45;&gt;nasm.asm -->
+<g id="node18" class="node">
+<title>Исполнение</title>
+<text text-anchor="middle" x="457.02" y="-62.99" font-family="Courier New" font-size="14.00">Execution</text><ellipse fill="none" stroke="rgb(64, 255, 255)" cx="457.02" cy="-67.19" rx="63.19" ry="63.19"/>
+<ellipse fill="none" stroke="rgb(64, 255, 255)" cx="457.02" cy="-67.19" rx="67.19" ry="67.19"/>
+
+</g><g id="node13" class="node">
+<title>BE-SPU</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M656.23,-564.38C656.23,-564.38 529.81,-564.38 529.81,-564.38 523.81,-564.38 517.81,-558.38 517.81,-552.38 517.81,-552.38 517.81,-540.38 517.81,-540.38 517.81,-534.38 523.81,-528.38 529.81,-528.38 529.81,-528.38 656.23,-528.38 656.23,-528.38 662.23,-528.38 668.23,-534.38 668.23,-540.38 668.23,-540.38 668.23,-552.38 668.23,-552.38 668.23,-558.38 662.23,-564.38 656.23,-564.38"/>
+
+<text text-anchor="middle" x="593.02" y="-542.18" font-family="Courier New" font-size="14.00">back-end-SPU.exe</text></g>
+<!-- Исполнение 3 -->
+
+<!-- AST&#45;&gt;Исполнение 3 -->
+
+<!-- jit.bin -->
+<g id="edge3" class="edge">
+<title>AST-&gt;BE-JIT</title>
+<path fill="none" stroke="black" d="M465.77,-630.13C422.78,-626.66 339.35,-613.56 293.02,-564.38 251.22,-520.01 242.96,-445.03 241.76,-404.12"/>
+<polygon fill="black" stroke="black" points="245.26,-404.29 241.61,-394.34 238.26,-404.4 245.26,-404.29"/>
+</g><g id="edge7" class="edge">
+<title>BE-JIT-P-&gt;Исполнение</title>
+<path fill="none" stroke="black" d="M176.25,-183.97C229.05,-162.2 320.3,-124.57 384.41,-98.14"/>
+<polygon fill="black" stroke="black" points="385.54,-101.45 393.45,-94.41 382.87,-94.98 385.54,-101.45"/>
+</g>
+<!-- AST&#45;&gt;jit.bin -->
+
+<!-- elf.exe -->
+
+<!-- AST&#45;&gt;elf.exe -->
+<g id="edge9" class="edge">
+<title>BE-ELF-&gt;ELF</title>
+<path fill="none" stroke="black" d="M396.28,-527.95C406.64,-472.61 438.85,-300.49 451.67,-231.96"/>
+<polygon fill="black" stroke="black" points="455.09,-232.74 453.49,-222.27 448.21,-231.45 455.09,-232.74"/>
+</g>
+<!-- spu.bin -->
+<g id="edge1" class="edge">
+<title>STL-&gt;FE</title>
+<path fill="none" stroke="black" d="M493.02,-785.98C493.02,-775.06 493.02,-760.7 493.02,-748.12"/>
+<polygon fill="black" stroke="black" points="496.52,-748.28 493.02,-738.28 489.52,-748.28 496.52,-748.28"/>
+</g>
+<!-- spu.asm&#45;&gt;spu.bin -->
+<g id="node6" class="node">
+<title>SPU-ASM</title>
+<polygon fill="#e0ffff" stroke="black" points="624.43,-478.38 555.62,-478.38 555.62,-442.38 630.43,-442.38 630.43,-472.38 624.43,-478.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="630.43,-472.38 624.43,-472.38"/>
+<text text-anchor="middle" x="593.02" y="-456.18" font-family="Courier New" font-size="14.00">spu.asm</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="624.43,-478.38 624.43,-472.38"/>
+
+</g>
+<!-- Исполнение 1 -->
+<g id="node3" class="node">
+<title>JIT</title>
+<polygon fill="#e0ffff" stroke="black" points="214.43,-306.38 145.62,-306.38 145.62,-270.38 220.43,-270.38 220.43,-300.38 214.43,-306.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="220.43,-300.38 214.43,-300.38"/>
+<text text-anchor="middle" x="183.02" y="-284.18" font-family="Courier New" font-size="14.00">jit.bin</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="214.43,-306.38 214.43,-300.38"/>
+
+</g><g id="edge8" class="edge">
+<title>AST-&gt;BE-ELF</title>
+<path fill="none" stroke="black" d="M472.3,-613.98C457.82,-601.82 438.28,-585.4 422.22,-571.91"/>
+<polygon fill="black" stroke="black" points="424.78,-569.49 414.87,-565.74 420.28,-574.85 424.78,-569.49"/>
+</g><g id="edge12" class="edge">
+<title>BE-SPU-&gt;SPU-ASM</title>
+<path fill="none" stroke="black" d="M593.02,-527.98C593.02,-517.06 593.02,-502.7 593.02,-490.12"/>
+<polygon fill="black" stroke="black" points="596.52,-490.28 593.02,-480.28 589.52,-490.28 596.52,-490.28"/>
+</g>
+<!-- spu.bin&#45;&gt;Исполнение 1 -->
+<g id="node14" class="node">
+<title>BE-NASM</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M865.43,-564.38C865.43,-564.38 730.61,-564.38 730.61,-564.38 724.61,-564.38 718.61,-558.38 718.61,-552.38 718.61,-552.38 718.61,-540.38 718.61,-540.38 718.61,-534.38 724.61,-528.38 730.61,-528.38 730.61,-528.38 865.43,-528.38 865.43,-528.38 871.43,-528.38 877.43,-534.38 877.43,-540.38 877.43,-540.38 877.43,-552.38 877.43,-552.38 877.43,-558.38 871.43,-564.38 865.43,-564.38"/>
+
+<text text-anchor="middle" x="798.02" y="-542.18" font-family="Courier New" font-size="14.00">back-end-NASM.exe</text></g>
+<!-- execute&#45;NASM.exe -->
+
+<!-- nasm.asm&#45;&gt;execute&#45;NASM.exe -->
+<g id="edge11" class="edge">
+<title>AST-&gt;BE-SPU</title>
+<path fill="none" stroke="black" d="M513.74,-613.98C528.22,-601.82 547.76,-585.4 563.82,-571.91"/>
+<polygon fill="black" stroke="black" points="565.76,-574.85 571.17,-565.74 561.26,-569.49 565.76,-574.85"/>
+</g><g id="edge18" class="edge">
+<title>BE-NASM-&gt;NASM</title>
+<path fill="none" stroke="black" d="M794.91,-527.98C792.94,-516.94 790.35,-502.41 788.08,-489.73"/>
+<polygon fill="black" stroke="black" points="791.59,-489.49 786.39,-480.26 784.7,-490.72 791.59,-489.49"/>
+</g>
+<!-- Исполнение 2 -->
+
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<g id="edge6" class="edge">
+<title>JIT-&gt;BE-JIT-P</title>
+<path fill="none" stroke="black" d="M172.87,-269.98C166.23,-258.6 157.43,-243.51 149.88,-230.57"/>
+<polygon fill="black" stroke="black" points="152.98,-228.95 144.92,-222.07 146.94,-232.48 152.98,-228.95"/>
+</g>
+<!-- jit.bin&#45;&gt;Исполнение 3 -->
+<g id="node4" class="node">
+<title>ELF</title>
+<polygon fill="#e0ffff" stroke="black" points="488.43,-220.38 419.62,-220.38 419.62,-184.38 494.43,-184.38 494.43,-214.38 488.43,-220.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="494.43,-214.38 488.43,-214.38"/>
+<text text-anchor="middle" x="457.02" y="-198.18" font-family="Courier New" font-size="14.00">elf.exe</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="488.43,-220.38 488.43,-214.38"/>
+
+</g>
+<!-- Исполнение 4 -->
+<g id="edge10" class="edge">
+<title>ELF-&gt;Исполнение</title>
+<path fill="none" stroke="black" d="M457.02,-183.97C457.02,-173.9 457.02,-160.44 457.02,-146.26"/>
+<polygon fill="black" stroke="black" points="460.52,-146.31 457.02,-136.31 453.52,-146.31 460.52,-146.31"/>
+</g>
+<!-- elf.exe&#45;&gt;Исполнение 4 -->
+
+
+
+
+<g id="node16" class="node">
+<title>SPU-COMPILER</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M652.03,-392.38C652.03,-392.38 534.01,-392.38 534.01,-392.38 528.01,-392.38 522.01,-386.38 522.01,-380.38 522.01,-380.38 522.01,-368.38 522.01,-368.38 522.01,-362.38 528.01,-356.38 534.01,-356.38 534.01,-356.38 652.03,-356.38 652.03,-356.38 658.03,-356.38 664.03,-362.38 664.03,-368.38 664.03,-368.38 664.03,-380.38 664.03,-380.38 664.03,-386.38 658.03,-392.38 652.03,-392.38"/>
+
+<text text-anchor="middle" x="593.02" y="-370.18" font-family="Courier New" font-size="14.00">compile-SPU.exe</text></g><g id="edge17" class="edge">
+<title>AST-&gt;BE-NASM</title>
+<path fill="none" stroke="black" d="M520.36,-623.86C565.72,-611.36 658.05,-585.93 723.78,-567.83"/>
+<polygon fill="black" stroke="black" points="724.32,-571.31 733.03,-565.28 722.46,-564.56 724.32,-571.31"/>
+</g>
+<g id="edge13" class="edge">
+<title>SPU-ASM-&gt;SPU-COMPILER</title>
+<path fill="none" stroke="black" d="M593.02,-441.98C593.02,-431.06 593.02,-416.7 593.02,-404.12"/>
+<polygon fill="black" stroke="black" points="596.52,-404.28 593.02,-394.28 589.52,-404.28 596.52,-404.28"/>
+</g>
+<g id="node7" class="node">
+<title>SPU-BIN</title>
+<polygon fill="#e0ffff" stroke="black" points="621.43,-306.38 552.62,-306.38 552.62,-270.38 627.43,-270.38 627.43,-300.38 621.43,-306.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="627.43,-300.38 621.43,-300.38"/>
+<text text-anchor="middle" x="590.02" y="-284.18" font-family="Courier New" font-size="14.00">spu.bin</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="621.43,-306.38 621.43,-300.38"/>
+
+</g>
+<g id="edge14" class="edge">
+<title>SPU-COMPILER-&gt;SPU-BIN</title>
+<path fill="none" stroke="black" d="M592.4,-355.98C592.01,-345.06 591.5,-330.7 591.05,-318.12"/>
+<polygon fill="black" stroke="black" points="594.55,-318.15 590.7,-308.28 587.55,-318.4 594.55,-318.15"/>
+</g><g id="node5" class="node">
+<title>NASM</title>
+<polygon fill="#e0ffff" stroke="black" points="818.63,-478.38 741.42,-478.38 741.42,-442.38 824.63,-442.38 824.63,-472.38 818.63,-478.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="824.63,-472.38 818.63,-472.38"/>
+<text text-anchor="middle" x="783.02" y="-456.18" font-family="Courier New" font-size="14.00">nasm.asm</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="818.63,-478.38 818.63,-472.38"/>
+
+</g>
+<g id="node17" class="node">
+<title>SPU-VM</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M610.43,-220.38C610.43,-220.38 559.62,-220.38 559.62,-220.38 553.62,-220.38 547.62,-214.38 547.62,-208.38 547.62,-208.38 547.62,-196.38 547.62,-196.38 547.62,-190.38 553.62,-184.38 559.62,-184.38 559.62,-184.38 610.43,-184.38 610.43,-184.38 616.43,-184.38 622.43,-190.38 622.43,-196.38 622.43,-196.38 622.43,-208.38 622.43,-208.38 622.43,-214.38 616.43,-220.38 610.43,-220.38"/>
+
+<text text-anchor="middle" x="585.02" y="-198.18" font-family="Courier New" font-size="14.00">spu.exe</text></g>
+<g id="edge15" class="edge">
+<title>SPU-BIN-&gt;SPU-VM</title>
+<path fill="none" stroke="black" d="M588.98,-269.98C588.33,-259.06 587.48,-244.7 586.73,-232.12"/>
+<polygon fill="black" stroke="black" points="590.23,-232.05 586.15,-222.28 583.25,-232.47 590.23,-232.05"/>
+</g><g id="node15" class="node">
+<title>NASM-COMPILER</title>
+<path fill="none" stroke="rgb(64, 255, 255)" d="M784.02,-392.38C784.02,-392.38 754.02,-392.38 754.02,-392.38 748.02,-392.38 742.02,-386.38 742.02,-380.38 742.02,-380.38 742.02,-368.38 742.02,-368.38 742.02,-362.38 748.02,-356.38 754.02,-356.38 754.02,-356.38 784.02,-356.38 784.02,-356.38 790.02,-356.38 796.02,-362.38 796.02,-368.38 796.02,-368.38 796.02,-380.38 796.02,-380.38 796.02,-386.38 790.02,-392.38 784.02,-392.38"/>
+
+<text text-anchor="middle" x="769.02" y="-370.18" font-family="Courier New" font-size="14.00">nasm</text></g>
+<g id="edge16" class="edge">
+<title>SPU-VM-&gt;Исполнение</title>
+<path fill="none" stroke="black" d="M568.29,-183.97C553.69,-168.78 531.67,-145.87 511.06,-124.43"/>
+<polygon fill="black" stroke="black" points="513.75,-122.17 504.3,-117.39 508.71,-127.03 513.75,-122.17"/>
+</g><g id="edge19" class="edge">
+<title>NASM-&gt;NASM-COMPILER</title>
+<path fill="none" stroke="black" d="M780.12,-441.98C778.3,-431.06 775.91,-416.7 773.81,-404.12"/>
+<polygon fill="black" stroke="black" points="777.26,-403.55 772.17,-394.26 770.36,-404.7 777.26,-403.55"/>
+</g>
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+
+
+<!-- execute&#45;NASM.exe&#45;&gt;Исполнение 2 -->
+<g id="node8" class="node">
+<title>NASM-EXE</title>
+<polygon fill="#e0ffff" stroke="black" points="788.63,-306.38 711.42,-306.38 711.42,-270.38 794.63,-270.38 794.63,-300.38 788.63,-306.38"/>
+<polyline fill="none" stroke="rgb(0, 0, 0)" points="794.63,-300.38 788.63,-300.38"/>
+<text text-anchor="middle" x="753.02" y="-284.18" font-family="Courier New" font-size="14.00">nasm.exe</text><polyline fill="none" stroke="rgb(0, 0, 0)" points="788.63,-306.38 788.63,-300.38"/>
+
+</g>
+<g id="edge20" class="edge">
+<title>NASM-COMPILER-&gt;NASM-EXE</title>
+<path fill="none" stroke="black" d="M765.71,-355.98C763.6,-344.94 760.83,-330.41 758.42,-317.73"/>
+<polygon fill="black" stroke="black" points="761.92,-317.42 756.61,-308.25 755.05,-318.73 761.92,-317.42"/>
+</g>
+<g id="edge21" class="edge">
+<title>NASM-EXE-&gt;Исполнение</title>
+<path fill="none" stroke="black" d="M737.53,-270.13C717.75,-248.64 681.89,-211.44 647.02,-184.38 609.03,-154.9 563.1,-126.64 525.92,-105.37"/>
+<polygon fill="black" stroke="black" points="527.91,-102.48 517.49,-100.59 524.46,-108.56 527.91,-102.48"/>
+</g>
+</g>
+</svg>

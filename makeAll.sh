@@ -16,11 +16,14 @@ g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE=\"../STL_Asm/ST
 g++ -c lib/STL_Stack/STL_stack_functions.cpp   -DSTACK_FILE_TYPE=\"../STL_Spu/STACK_FILE_TYPE_int.h\" -o temp/stack_int_func.o
 g++ -c lib/STL_Stack/STL_stack_print_error.cpp -DSTACK_FILE_TYPE=\"../STL_Spu/STACK_FILE_TYPE_int.h\" -o temp/stack_int_error.o
 
+g++ -c lib/STL_Stack/STL_stack_functions.cpp   -Ofast -DNDEBUG -DSTACK_FILE_TYPE=\"../STL_Spu/STACK_FILE_TYPE_int.h\" -o temp/stack_int_func-fast.o
+g++ -c lib/STL_Stack/STL_stack_print_error.cpp -Ofast -DNDEBUG -DSTACK_FILE_TYPE=\"../STL_Spu/STACK_FILE_TYPE_int.h\" -o temp/stack_int_error-fast.o
+
 make front-end
 make back-end-ELF
 make back-end-JIT
 make back-end-NASM
 make back-end-SPU
-make compile
+make compile-SPU
 make spu
 make spu-fast

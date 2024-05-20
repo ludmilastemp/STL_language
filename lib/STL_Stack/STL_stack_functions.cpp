@@ -26,16 +26,20 @@ static void STL_Print (const char* const fmt, ...);
         }                                                           \
     } while (false)
 #else
-    #define StackVERIFICATOR(stk)                                   \
-    do {                                                            \
-                                                                    \
-        if (STL_StackVerificator ((stk)))                           \
-        {                                                           \
-            StackPrintErr (stk);                                    \
-            StackDUMP (stk);                                        \
-            return stk->err;                                        \
-        }                                                           \
-    } while (false)
+    #ifdef NDEBUG
+        #define StackVERIFICATOR(stk) ;
+    #else
+        #define StackVERIFICATOR(stk)                                   \
+        do {                                                            \
+                                                                        \
+            if (STL_StackVerificator ((stk)))                           \
+            {                                                           \
+                StackPrintErr (stk);                                    \
+                StackDUMP (stk);                                        \
+                return stk->err;                                        \
+            }                                                           \
+        } while (false)
+    #endif
 #endif
 
 /**

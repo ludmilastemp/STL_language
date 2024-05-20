@@ -83,6 +83,15 @@ void GenMovRIMM (char** buffer, Reg_t reg, int value)
     GenValue (buffer, value);                   *buffer += 8 - sizeof (value);
 }
 
+void GenCallAbs (char** buffer, Reg_t reg)
+{
+    assert (buffer);
+    assert (*buffer);
+
+    **buffer = OPCODE_CALL_ABS; (*buffer)++;
+    **buffer = MakeModrm (MODRM_MOD_RM, OPCODE_CALL_K_NEAR_ABS, reg); (*buffer)++;
+}
+
 void GenRet (char** buffer)
 {
     assert (buffer);
@@ -109,6 +118,28 @@ void GenSub (char** buffer, Reg_t reg1, Reg_t reg2)
     **buffer = PREFIX_REX;                           (*buffer)++;           
     **buffer = OPCODE_SUB_R_FROM_RM;                 (*buffer)++; 
     **buffer = MakeModrm (MODRM_MOD_RM, reg2, reg1); (*buffer)++;
+}
+                    
+void GenAddRIMM (char** buffer, Reg_t reg, int value)
+{
+    assert (buffer);
+    assert (*buffer);
+    
+    **buffer = PREFIX_REX;                           (*buffer)++;           
+    **buffer = OPCODE_ADD_SUB_R_IMM;                 (*buffer)++; 
+    **buffer = MakeModrm (MODRM_MOD_RM, OPCODE_CONST_ADD_R_IMM, reg); (*buffer)++;
+    GenDisp (buffer, value);
+}          
+
+void GenSubRIMM (char** buffer, Reg_t reg, int value)
+{
+    assert (buffer);
+    assert (*buffer);
+    
+    **buffer = PREFIX_REX;                           (*buffer)++;           
+    **buffer = OPCODE_ADD_SUB_R_IMM;                 (*buffer)++; 
+    **buffer = MakeModrm (MODRM_MOD_RM, OPCODE_CONST_SUB_R_IMM, reg); (*buffer)++;
+    GenDisp (buffer, value);
 }
                     
 void GenMul (char** buffer, Reg_t regM, int disp)

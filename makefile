@@ -142,7 +142,7 @@ back-end-SPU: 	back-end-SPU/main.cpp 						\
 		$(FLAGS)											\
 		-o back-end-SPU.exe
 
-compile: 	lib/STL_Asm/main.cpp 							\
+compile-SPU: 	lib/STL_Asm/main.cpp 						\
 			lib/STL_Asm/STL_compile.h 						\
 			lib/STL_Asm/STL_compile.cpp 					\
 			lib/STL_Asm/STL_label.h        					\
@@ -171,7 +171,7 @@ compile: 	lib/STL_Asm/main.cpp 							\
 		temp/stack_fixup_func.o                      		\
 		temp/stack_fixup_error.o                     		\
 		$(FLAGS)											\
-		-o compile.exe
+		-o compile-SPU.exe
 
 spu:    	lib/STL_Spu/main.cpp 							\
 			lib/STL_Spu/STL_spu.h   						\
@@ -211,8 +211,8 @@ spu-fast:   lib/STL_Spu/main.cpp 							\
 			lib/STL_Onegin/STL_file_open.cpp				\
 			lib/STL_Onegin/STL_header.h						\
 			lib/STL_Onegin/STL_header.cpp					\
-			temp/stack_int_func.o 							\
-			temp/stack_int_error.o 							\
+			temp/stack_int_func-fast.o 						\
+			temp/stack_int_error-fast.o 					\
 
 	g++ lib/STL_Spu/main.cpp 								\
 		lib/STL_Spu/STL_spu.cpp 							\
@@ -220,8 +220,8 @@ spu-fast:   lib/STL_Spu/main.cpp 							\
 		lib/STL_Spu/include/STL_spu_struct_const.cpp    	\
 		lib/STL_Onegin/STL_file_open.cpp					\
 		lib/STL_Onegin/STL_header.cpp						\
-		temp/stack_int_func.o 								\
-		temp/stack_int_error.o 								\
+		temp/stack_int_func-fast.o 							\
+		temp/stack_int_error-fast.o 						\
 		-Ofast -DNDEBUG										\
 		-o spu-fast.exe
 

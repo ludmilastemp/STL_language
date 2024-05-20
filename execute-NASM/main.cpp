@@ -2,9 +2,8 @@
 #include <math.h>
 
 extern "C" int Func ();
-extern "C" int MySqrt (int);
-
-extern "C" int MyPrint ();
+extern "C" int MySqrt  (int);
+extern "C" int MyPrint (int);
 
 int main ()
 {
@@ -16,9 +15,9 @@ int MySqrt (int x)
     return (int)(sqrt((double)x));
 }
 
-int MyPrint ()
+int MyPrint (int x)
 {
-    printf ("HI!\n");
+    printf ("%d\n", x);
 
     return 0;
 }

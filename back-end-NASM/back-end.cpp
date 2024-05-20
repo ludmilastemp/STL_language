@@ -1,7 +1,6 @@
 #include "back-end.h"
 
 #define $printf(...)
-// #define PRINT_FUNCTION() do { printf("I'm in %s\n", __PRETTY_FUNCTION__); } while (0)
 
 static int CompileMultipleOperations (BackEndCtx* ctx);
 static int CompileOperation          (BackEndCtx* ctx);
@@ -9,7 +8,7 @@ static int CompileActualArguments    (BackEndCtx* ctx);
 static int CompileFormalArguments    (BackEndCtx* ctx);
 static int CompileFunction           (BackEndCtx* ctx);
 static int CompileFuncReturn         (BackEndCtx* ctx);
-// static int CompilePrintf             (BackEndCtx* ctx);
+static int CompilePrintf             (BackEndCtx* ctx);
 static int CompileAssign             (BackEndCtx* ctx);
 static int CompileConditionOp        (BackEndCtx* ctx);
 static int CompileCreate             (BackEndCtx* ctx);
@@ -25,6 +24,7 @@ int CompileProgram (BackEndCtx* ctx)
 
     fprintf (ctx->fp, "\nglobal Func");
     fprintf (ctx->fp, "\nextern MySqrt");
+    fprintf (ctx->fp, "\nextern MyPrint");
     fprintf (ctx->fp, "\n\nsection .text");
 
     /**
@@ -123,7 +123,7 @@ static int CompileOperation (BackEndCtx* ctx)
     if (
         CompileFunction    (ctx) &&
         CompileFuncReturn  (ctx) &&
-        // CompilePrintf      (ctx) &&
+        CompilePrintf      (ctx) &&
         CompileConditionOp (ctx) &&
         CompileAssign      (ctx) &&
         CompileCreate      (ctx) && 
@@ -323,22 +323,42 @@ static int CompileCreate (BackEndCtx* ctx)
     return 0;
 }
 
-// static int CompilePrintf (BackEndCtx* ctx)
-// {
-//     assert (ctx);
-//     $printf ("I in CompilePrintf\n");
+static int CompilePrintf (BackEndCtx* ctx)
+{
+    assert (ctx);
+    $printf ("I in CompilePrintf\n");
 
-//     if (ctx->node->data->opCode != PRINTF)
-//         return ERROR_IN_CompilePrintf;
+    if (ctx->node->data->opCode != PRINTF)
+        return ERROR_IN_CompilePrintf;
 
-//     ctx->node = ctx->node->right;
+    ctx->node = ctx->node->right;
 
-//     if (CompileExpression (ctx)) return ERROR_IN_CompilePrintf;
+    if (CompileExpression (ctx)) return ERROR_IN_CompilePrintf;
 
-//     fprintf (ctx->fp, "\n\t\tout");
+    // fprintf (ctx->fp, "\n\t\tout");
 
-//     return 0;
-// }
+    fprintf (ctx->fp, "\n\n\t\t; сохраняем локальные перменные");
+    fprintf (ctx->fp, "\n\t\tsub     rsp, %d\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize); 
+
+    fprintf (ctx->fp, "\n\t\t; передаем аргументы");
+fprintf (ctx->fp, "\n\t\tmov     rax, -%d[rbp]",  
+            ((ctx->tempVar + ctx->nVarInFunc)) * variableSize);
+fprintf (ctx->fp, "\n\t\tmov     rdi, rax");
+
+    fprintf (ctx->fp, "\n\n\t\t; Вызов функции");
+    fprintf (ctx->fp, "\n\n\t\tpush    rbp");
+fprintf (ctx->fp, "\n\n\t\tcall MyPrint");
+    fprintf (ctx->fp, "\n\n\t\tpop     rbp");
+
+    fprintf (ctx->fp, "\n\n\t\t; возвращаем rsp");
+    fprintf (ctx->fp, "\n\t\tadd     rsp, %d", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);
+
+fprintf (ctx->fp, "\n\n\t\t; значениe return");
+fprintf (ctx->fp, "\n\t\tmov     -%d[rbp], rax\n", 
+        (ctx->tempVar + ctx->nVarInFunc) * variableSize);
+
+    return 0;
+}
 
 static int CompileConditionOp (BackEndCtx* ctx)
 {

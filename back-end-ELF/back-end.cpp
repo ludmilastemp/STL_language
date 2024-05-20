@@ -1,29 +1,22 @@
 #include "back-end.h"
 
-#define $printf(...)
-#define $fprintf(...)
-
-/// это скорее доки
-const int ValueSize = 4; /// in bytes
-const int DispSize  = 1; /// in bytes // пока что
-/// это скорее доки
-
-#define GenPush(...)  GenPush  (&ctx->buffer, __VA_ARGS__)
-#define GenPop(...)   GenPop   (&ctx->buffer, __VA_ARGS__)
-#define GenMovRR(...) GenMovRR (&ctx->buffer, __VA_ARGS__)
-#define GenMovRM(...) GenMovRM (&ctx->buffer, __VA_ARGS__)
-#define GenMovMR(...) GenMovMR (&ctx->buffer, __VA_ARGS__)
+#define GenPush(...)     GenPush     (&ctx->buffer, __VA_ARGS__)
+#define GenPop(...)      GenPop      (&ctx->buffer, __VA_ARGS__)
+#define GenMovRR(...)    GenMovRR    (&ctx->buffer, __VA_ARGS__)
+#define GenMovRM(...)    GenMovRM    (&ctx->buffer, __VA_ARGS__)
+#define GenMovMR(...)    GenMovMR    (&ctx->buffer, __VA_ARGS__)
 #define GenMovRMIMM(...) GenMovRMIMM (&ctx->buffer, __VA_ARGS__)
-#define GenMovRADD(...) GenMovRADD (&ctx->buffer, __VA_ARGS__)
-#define GenMovRIMM(...) GenMovRIMM (&ctx->buffer, __VA_ARGS__)
-// const char OPCODE_MOV_RM_TO_IMM = 0xc7;
-#define GenRet()     GenRet  (&ctx->buffer)
-#define GenAdd(...)  GenAdd  (&ctx->buffer, __VA_ARGS__)
-#define GenSub(...)  GenSub  (&ctx->buffer, __VA_ARGS__)
-#define GenMul(...)  GenMul  (&ctx->buffer, __VA_ARGS__)
-#define GenXor(...)  GenXor  (&ctx->buffer, __VA_ARGS__)
-#define GenCmp(...)  GenCmp  (&ctx->buffer, __VA_ARGS__)
-// const char OPCODE_JMP_NEAR      = 0xe9;
+#define GenMovRADD(...)  GenMovRADD  (&ctx->buffer, __VA_ARGS__)
+#define GenMovRIMM(...)  GenMovRIMM  (&ctx->buffer, __VA_ARGS__)
+#define GenCallAbs(...)  GenCallAbs  (&ctx->buffer, __VA_ARGS__)
+#define GenAdd(...)      GenAdd      (&ctx->buffer, __VA_ARGS__)
+#define GenAddRIMM(...)  GenAddRIMM  (&ctx->buffer, __VA_ARGS__)
+#define GenSubRIMM(...)  GenSubRIMM  (&ctx->buffer, __VA_ARGS__)
+#define GenSub(...)      GenSub      (&ctx->buffer, __VA_ARGS__)
+#define GenMul(...)      GenMul      (&ctx->buffer, __VA_ARGS__)
+#define GenXor(...)      GenXor      (&ctx->buffer, __VA_ARGS__)
+#define GenCmp(...)      GenCmp      (&ctx->buffer, __VA_ARGS__)
+#define GenRet()         GenRet      (&ctx->buffer)
 
 static int CompileMultipleOperations (BackEndCtx* ctx);
 static int CompileOperation          (BackEndCtx* ctx);
@@ -31,7 +24,7 @@ static int CompileActualArguments    (BackEndCtx* ctx);
 static int CompileFormalArguments    (BackEndCtx* ctx);
 static int CompileFunction           (BackEndCtx* ctx);
 static int CompileFuncReturn         (BackEndCtx* ctx);
-// static int CompilePrintf             (BackEndCtx* ctx);
+static int CompilePrintf             (BackEndCtx* ctx);
 static int CompileAssign             (BackEndCtx* ctx);
 static int CompileConditionOp        (BackEndCtx* ctx);
 static int CompileCreate             (BackEndCtx* ctx);
@@ -117,14 +110,12 @@ static int CompileMultipleOperations (BackEndCtx* ctx)
     {
         if (oldNode->data->opCode != END_OPERATION)
         {
-            $printf ("ERROR in CompileMultipleOperations!!!\n\n");
+            printf ("ERROR in CompileMultipleOperations!!!\n\n");
             return ERROR_IN_CompileMultipleOperations;
         }
 
         ctx->node = oldNode->left;
         CompileOperation (ctx);
-
-        $fprintf (ctx->fp, "\n");
 
         oldNode = oldNode->right;
     }
@@ -145,7 +136,6 @@ static int CompileOperation (BackEndCtx* ctx)
 
     {
         printf ("\nERROR in CompileOperation!!!\n\n");
-        fprintf (ctx->fp, "\n\nERROR in CompileOperation!!!\n\n");
 
         printf ("\n\ttype     = %d\
                  \n\tvalue    = %d\
@@ -172,66 +162,31 @@ static int CompileFunction (BackEndCtx* ctx)
         return ERROR_IN_CompileFunction;
 
     int nFunc = ctx->node->data->function;
-
-    $fprintf (ctx->fp, "\n\n\t\t; сохраняем локальные перменные");
-    $fprintf (ctx->fp, "\n\t\tsub     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);  
-
-    *(ctx->buffer) = PREFIX_REX; ctx->buffer++; /// prefix
-    *(ctx->buffer) = 0x83; ctx->buffer++; /// opcode // imm8
-
-    char modrm = 0;
-    modrm |= 0xC0; // 11 *** *** mod 
-    modrm |= 0x28; // ** 101 *** reg  (5 - const param)
-    modrm |= 0x04; // ** *** 100 rm 
-    *(ctx->buffer) = modrm; ctx->buffer++; /// modrm
-    
     int value = (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize;
-    *(ctx->buffer) = ((char*)&value)[0]; ctx->buffer++; /// value
+    GenSubRIMM (REG_RSP, value);
 
-    $fprintf (ctx->fp, "\n\t\t; передаем аргументы");
     CompileActualArguments (ctx);
 
-    $fprintf (ctx->fp, "\n\t\t; Вызов функции");
     GenPush (REG_RBP);
 
-    $fprintf (ctx->fp, "\n\n\t\tcall Func_%d_\n", nFunc); 
-    *(ctx->buffer) = 0xe8; ctx->buffer++; /// orcode 
+    *(ctx->buffer) = OPCODE_CALL_NEAR_REL; ctx->buffer++; 
 
     ctx->fixup[ctx->fixupSize]      = ctx->buffer;
     ctx->fixupNFunc[ctx->fixupSize] = nFunc;
     ctx->fixupSize++;
-
     ctx->buffer += 4;
 
     GenPop (REG_RBP);
 
-    $fprintf (ctx->fp, "\n\n\t\t; возвращаем rsp");
-
-    $fprintf (ctx->fp, "\n\t\tadd     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);
-    
-    *(ctx->buffer) = PREFIX_REX; ctx->buffer++; /// prefix
-    *(ctx->buffer) = 0x83; ctx->buffer++; /// opcode // imm8
-
-    modrm = 0;
-    modrm |= 0xC0; // 11 *** *** mod 
-    modrm |= 0x00; // ** 000 *** reg (0 - const param)
-    modrm |= 0x04; // ** *** 100 rm 
-    *(ctx->buffer) = modrm; ctx->buffer++; /// modrm
-    
     value = (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize;
-    *(ctx->buffer) = ((char*)&value)[0]; ctx->buffer++; /// value
+    GenAddRIMM (REG_RSP, value);
 
-
-    // GenMovRIMM (REG_RAX, value);
-    // GenAdd (REG_RSP, REG_RAX);
-    
     return 0;
 }
 
 static int CompileFuncReturn (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileFuncReturn\n");
 
     if (ctx->node->data->opCode != FUNC_RETURN)
         return ERROR_IN_CompileFuncReturn;
@@ -257,7 +212,6 @@ static int CompileFuncReturn (BackEndCtx* ctx)
 static int CompileFormalArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileFormalArguments\n");
 
     if (ctx->node               == nullptr ||
         ctx->node->data->opCode != END_OPERATION)
@@ -268,7 +222,6 @@ static int CompileFormalArguments (BackEndCtx* ctx)
     if (ctx->node->right != nullptr)
     {
         ctx->node = ctx->node->right;
-
         CompileFormalArguments (ctx);
     }
 
@@ -292,7 +245,6 @@ static int CompileFormalArguments (BackEndCtx* ctx)
 static int CompileActualArguments (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileActualArguments\n"); 
 
     NodeBinTree* oldNode = nullptr;
 
@@ -316,8 +268,6 @@ static int CompileActualArguments (BackEndCtx* ctx)
         ctx->tempVar--;
 
         ctx->node = oldNode;
-
-        $fprintf (ctx->fp, "\n");
     }
 
     return 0;
@@ -326,24 +276,14 @@ static int CompileActualArguments (BackEndCtx* ctx)
 static int CompileAssign (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileAssign\n");
 
     if (ctx->node      ->data->opCode   != ASSING ||
         ctx->node->left->data->variable == NodeBinTreeData::VARIABLE_POISON)
         return ERROR_IN_CompileAssign;
 
     NodeBinTree* oldNode = ctx->node;
-
-    $fprintf (ctx->fp, "\n\n\t\t; Assign ");
-    // for (size_t i = 0; i < ctx->var->data[oldNode->left->data->variable].len; i++)
-    //     fprintf (ctx->fp, "%c", ctx->var->data[oldNode->left->data->variable].name[i]);
-
-    $printf ("I in CompileAssign before right\n");
-
     ctx->node = oldNode->right;
     CompileExpression (ctx);
-
-    $printf ("I in CompileAssign after right\n");
 
     int disp = -1 * (ctx->tempVar + ctx->nVarInFunc) * variableSize;
     GenMovRM (REG_RAX, REG_RBP, disp);
@@ -358,14 +298,12 @@ static int CompileAssign (BackEndCtx* ctx)
 
     ctx->node = oldNode;
 
-    $printf ("I end CompileAssign\n");
     return 0;
 }
 
 static int CompileCreate (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileCreate\n");
 
     if (ctx->node->data->opCode != T_INT)
         return ERROR_IN_CompileCreate;
@@ -376,7 +314,6 @@ static int CompileCreate (BackEndCtx* ctx)
 // static int CompilePrintf (BackEndCtx* ctx)
 // {
 //     assert (ctx);
-//     $printf ("I in CompilePrintf\n");
 
 //     if (ctx->node->data->opCode != PRINTF)
 //         return ERROR_IN_CompilePrintf;
@@ -393,20 +330,14 @@ static int CompileCreate (BackEndCtx* ctx)
 static int CompileConditionOp (BackEndCtx* ctx)
 {
     assert (ctx);
-    $printf ("I in CompileConditionOp\n");
 
     char* condition = ctx->buffer;
     char* fixElse = nullptr;
     char* fixEnd  = nullptr;
-    if (ctx->node->data->opCode == IF)
-    {
-        $fprintf (ctx->fp, "\n\n.if_%d_condition:", ctx->nIf);
-    }
-    else if (ctx->node->data->opCode == WHILE)
-    {
-        $fprintf (ctx->fp, "\n\n.while_%d_condition:", ctx->nWhile);
-    }
-    else return ERROR_IN_CompileIf;
+
+    if (ctx->node->data->opCode != IF && 
+        ctx->node->data->opCode != WHILE)
+        return ERROR_IN_CompileIf;
 
     NodeBinTree* oldNode = ctx->node;
 
@@ -431,37 +362,37 @@ static int CompileConditionOp (BackEndCtx* ctx)
     {
         case ABOVE:
 
-            *(ctx->buffer) = OPCODE_JCC_JA; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JA; ctx->buffer++;
 
             break;
 
         case ABOVE_EQUAL:
 
-            *(ctx->buffer) = OPCODE_JCC_JAE; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JAE; ctx->buffer++;
 
             break;
 
         case BELOW:
 
-            *(ctx->buffer) = OPCODE_JCC_JB; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JB; ctx->buffer++; 
 
             break;
 
         case BELOW_EQUAL:
 
-            *(ctx->buffer) = OPCODE_JCC_JBE; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JBE; ctx->buffer++; 
 
             break;
 
         case EQUAL:
 
-            *(ctx->buffer) = OPCODE_JCC_JE; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JE; ctx->buffer++; 
 
             break;
 
         case NO_EQUAL:
 
-            *(ctx->buffer) = OPCODE_JCC_JNE; ctx->buffer++; /// opcode
+            *(ctx->buffer) = OPCODE_JCC_JNE; ctx->buffer++; 
 
             break;
 
@@ -473,28 +404,22 @@ static int CompileConditionOp (BackEndCtx* ctx)
 
     if (oldNode->data->opCode == IF)
     {
-        $fprintf (ctx->fp, " .if_%d_body", ctx->nIf);
-        *(ctx->buffer) = 0x05; ctx->buffer++; /// value // skip next jmp (const)
+        *(ctx->buffer) = 0x05; ctx->buffer++; // skip next jmp (const)
 
         /* jmp to else */
-        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; /// opcode
+        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; 
         fixElse = ctx->buffer;
         ctx->buffer += 4;
-
-        $fprintf (ctx->fp, "\n\n.if_%d_body:", ctx->nIf);
     }
 
     else
     {
-        $fprintf (ctx->fp, " .while_%d_body", ctx->nWhile);
-        *(ctx->buffer) = 0x05; ctx->buffer++; /// value // skip next jmp (const)
+        *(ctx->buffer) = 0x05; ctx->buffer++;  // skip next jmp (const)
 
-        /* jmp ot end */
-        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; /// opcode
+        /* jmp to end */
+        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; 
         fixEnd = ctx->buffer;
         ctx->buffer += 4;
-
-        $fprintf (ctx->fp, "\n\n.while_%d_body:", ctx->nWhile);
     }
 
     ctx->node = oldNode->right->left;
@@ -503,11 +428,10 @@ static int CompileConditionOp (BackEndCtx* ctx)
     if (oldNode->data->opCode == IF)
     {
         /* jmp to end */
-        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; /// opcode
+        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; 
         fixEnd = ctx->buffer;
         ctx->buffer += 4;
 
-        $fprintf (ctx->fp, "\n\n.else_%d_body:", ctx->nIf);
         int value = ctx->buffer - (fixElse + 4);
         GenValue (&fixElse, value);
 
@@ -516,9 +440,7 @@ static int CompileConditionOp (BackEndCtx* ctx)
             ctx->node = oldNode->right->right;
             CompileMultipleOperations (ctx);
         }
-        $fprintf (ctx->fp, "\n\t\tjmp .if_%d_end", ctx->nIf);
 
-        $fprintf (ctx->fp, "\n\n.if_%d_end:\n\n", ctx->nIf);
         value = ctx->buffer - (fixEnd + 4);
         GenValue (&fixEnd, value);
 
@@ -528,11 +450,10 @@ static int CompileConditionOp (BackEndCtx* ctx)
     else
     {
         /* jmp to condition */
-        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++; /// opcode
+        *(ctx->buffer) = OPCODE_JMP_NEAR; ctx->buffer++;
         int value = (ctx->buffer + 4) - condition;
         GenValue (&ctx->buffer, value);
 
-        $fprintf (ctx->fp, "\n\n.while_%d_end:\n\n", ctx->nWhile);
         value = ctx->buffer - (fixEnd + 4);
         GenValue (&fixEnd, value);
         ctx->nWhile++;
@@ -551,11 +472,7 @@ static int CompileExpression (BackEndCtx* ctx)
 
     if (ctx->node->data->type == NodeBinTreeData::T_FUNCTION)
     {
-        $printf ("BEFORE CompileFunction in if\n\n");
-
         CompileFunction (ctx);
-
-        $fprintf (ctx->fp, "\n\t\t; Значение return");
         ctx->tempVar++;
 
         int disp = -1 * (ctx->tempVar + ctx->nVarInFunc) * variableSize;
@@ -571,17 +488,6 @@ static int CompileExpression (BackEndCtx* ctx)
     if (ctx->node != nullptr) CompileExpression (ctx);
 
     ctx->node = oldNode;
-
-    $printf ("\n\ttype     = %d"
-            "\n\tvalue    = %d"
-            "\n\topCode   = %d"
-            "\n\tvariable = %d"
-            "\n\tfunction = %d\n",
-            ctx->node->data->type,
-            ctx->node->data->value,
-            ctx->node->data->opCode,
-            ctx->node->data->variable,
-            ctx->node->data->function);
 
     switch (ctx->node->data->type)
     {
@@ -683,58 +589,23 @@ static int CompileExpression (BackEndCtx* ctx)
 
                 case SQRT:
                     {
-                        $fprintf (ctx->fp, "\n\n\t\t; сохраняем локальные перменные");
-                        $fprintf (ctx->fp, "\n\t\tsub     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);  
-
-                        *(ctx->buffer) = PREFIX_REX; ctx->buffer++; /// prefix
-                        *(ctx->buffer) = 0x83; ctx->buffer++; /// opcode // imm8
-
-                        char modrm = 0;
-                        modrm |= 0xC0; // 11 *** *** mod 
-                        modrm |= 0x28; // ** 101 *** reg  (5 - const param)
-                        modrm |= 0x04; // ** *** 100 rm 
-                        *(ctx->buffer) = modrm; ctx->buffer++; /// modrm
-                        
                         int value = (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize;
-                        *(ctx->buffer) = ((char*)&value)[0]; ctx->buffer++; ///
+                        GenSubRIMM (REG_RSP, value);
 
-
-                        $fprintf (ctx->fp, "\n\t\t; передаем аргументы");
                         int disp = -1 * ((ctx->tempVar + ctx->nVarInFunc)) * variableSize;
                         GenMovRM (REG_RAX, REG_RBP, disp);
 
-                        $fprintf (ctx->fp, "\n\t\tmov     rdi, rax");
-                        *(ctx->buffer) = 0x48; ctx->buffer++; 
-                        *(ctx->buffer) = 0x89; ctx->buffer++; 
-                        *(ctx->buffer) = 0xc7; ctx->buffer++; 
-
-                        $fprintf (ctx->fp, "\n\n\t\t; Вызов функции");
+                        GenMovRR (REG_RDI, REG_RAX);
                         GenPush (REG_RBP);
 
-                        $fprintf (ctx->fp, "\n\n\t\tcall MySqrt");
                         GenMovRADD (REG_RAX, (char*)MySqrt);
-
-                        *(ctx->buffer) = 0xFF; ctx->buffer++; /// orcode 
-                        *(ctx->buffer) = 0xd0; ctx->buffer++; /// orcode 
+                        GenCallAbs (REG_RAX);
 
                         GenPop (REG_RBP);
 
-                        $fprintf (ctx->fp, "\n\n\t\t; возвращаем rsp");
-                        $fprintf (ctx->fp, "\n\t\tadd     rsp, %d\n\n", (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize);
-                        
-                        *(ctx->buffer) = PREFIX_REX; ctx->buffer++; /// prefix
-                        *(ctx->buffer) = 0x83; ctx->buffer++; /// opcode // imm8
-
-                        modrm = 0;
-                        modrm |= 0xC0; // 11 *** *** mod 
-                        modrm |= 0x00; // ** 000 *** reg (0 - const param)
-                        modrm |= 0x04; // ** *** 100 rm 
-                        *(ctx->buffer) = modrm; ctx->buffer++; /// modrm
-                        
                         value = (ctx->tempVar + ctx->nVarInFunc + 1) * variableSize;
-                        *(ctx->buffer) = ((char*)&value)[0]; ctx->buffer++; /// value
+                        GenAddRIMM (REG_RSP, value);
 
-                        $fprintf (ctx->fp, "\n\n\t\t; значениe return");
                         disp = -1 * (ctx->tempVar + ctx->nVarInFunc) * variableSize;
                         GenMovMR (REG_RAX, REG_RBP, disp);
 
@@ -787,4 +658,20 @@ static int CompileExpression (BackEndCtx* ctx)
     return 0;
 }
 
-#undef $printf
+#undef GenPush     
+#undef GenPop      
+#undef GenMovRR    
+#undef GenMovRM    
+#undef GenMovMR    
+#undef GenMovRMIMM 
+#undef GenMovRADD  
+#undef GenMovRIMM  
+#undef GenCallAbs  
+#undef GenAdd      
+#undef GenAddRIMM  
+#undef GenSubRIMM  
+#undef GenSub      
+#undef GenMul      
+#undef GenXor      
+#undef GenCmp      
+#undef GenRet       
